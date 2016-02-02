@@ -1,16 +1,12 @@
 #include "stdafx.h"
 #include "Tag.h"
 
-Tag::Tag(std::string name)
+Tag::Tag(std::string tagName, std::list<std::string> attributes)
 {
-	this->name = name;
+	this->tagName = tagName;
+	this->attributes = attributes;
 }
 
 Tag::Tag()
-{
-}
-
-
-Tag::~Tag()
-{
-}
+	: tagName(0), attributes(0)
+{}

@@ -4,8 +4,7 @@
 
 class TagParser
 {
-
 public:		
-	virtual std::queue<Tag> parseTagsFrom(std::string nameOfFileToParse) = 0;
+	virtual std::queue<Tag> parseTagsFrom(std::string fileToParseFrom) = 0;
 };
 

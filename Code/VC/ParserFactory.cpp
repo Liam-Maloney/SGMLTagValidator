@@ -2,22 +2,14 @@
 #include "ParserFactory.h"
 #include "XMLTagParser.h"
 
-TagParser* ParserFactory::createParserFor(std::string typeOfParserToCreate)
+TagParser* ParserFactory::createParserFor(std::string fileType)
 {
-	if (typeOfParserToCreate == "xml")
+	if (fileType == "xml")
 	{
 		return new XMLTagParser();
 	}
-	else {
+	else
+	{
 		return NULL;
 	}
-}
-
-ParserFactory::ParserFactory()
-{
-}
-
-
-ParserFactory::~ParserFactory()
-{
 }

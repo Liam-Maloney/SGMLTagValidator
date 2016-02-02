@@ -1,12 +1,15 @@
 #pragma once
 #include <string>
+#include <list>
 
 class Tag
 {
-	std::string name;
+	std::string tagName;
+	std::list<std::string> attributes;
+
 public:
-	Tag();
-	Tag(std::string name);
-	~Tag();
+	Tag::Tag();
+	Tag(std::string tagName, std::list<std::string> attributes);
+
 };
 

@@ -5,8 +5,6 @@
 class ParserFactory
 {
 public:
-	TagParser* createParserFor(std::string createAParserForThisFileType);
-	ParserFactory();
-	~ParserFactory();
+	TagParser* createParserFor(std::string fileType);
 };
 
