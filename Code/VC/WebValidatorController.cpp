@@ -10,13 +10,24 @@ std::string WebValidator::fileExtensionTypeOf(std::string fileToValidate)
 std::string WebValidator::getValidationReportFor(std::string fileToValidate) 
 {
 	TagParser* polymorphicParser = parserSupplier.createParserFor(fileExtensionTypeOf(fileToValidate));
-	std::queue<Tag> parsedTags = polymorphicParser->parseTagsFrom(fileToValidate);
+	try
+	{
+		std::list<Tag> parsedTags = polymorphicParser->parseTagsFrom(fileToValidate);
+	}
+	catch (std::exception &cause)
+	{
+		std::cout << "Error: " << cause.what();
+	}
 	//TODO: Pass off the returned queue of items to be validated.
 	return "Nothing For Now";
 }
 
-void main()
+int main(int argc, char* argv[])
 {
-	WebValidator webDocValidator;
-	std::string validationReport = webDocValidator.getValidationReportFor("test.xml");
+	::testing::InitGoogleTest(&argc, argv);
+
+	WebValidator validator;
+	validator.getValidationReportFor("test.xml");
+
+	return RUN_ALL_TESTS();
 }
