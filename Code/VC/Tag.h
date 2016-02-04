@@ -12,7 +12,7 @@ class Tag
 public:
 
 	Tag::Tag();
-	Tag(std::string tagName, std::list<std::string> attributes);
+	Tag(std::string tagName, std::list<std::string> attributes, int lineNumber);
 
 };
 

@@ -6,8 +6,8 @@ XMLTag::XMLTag()
 
 }
 
-XMLTag::XMLTag(std::string tagName, std::list<std::string> attributes)
-	: XMLTag::Tag(tagName, attributes)
+XMLTag::XMLTag(std::string tagName, std::list<std::string> attributes, int lineNumber)
+	: XMLTag::Tag(tagName, attributes, lineNumber)
 {
 
 }

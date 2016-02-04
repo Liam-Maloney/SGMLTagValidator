@@ -12,7 +12,7 @@ std::string WebValidator::getValidationReportFor(std::string fileToValidate)
 	TagParser* polymorphicParser = parserSupplier.createParserFor(fileExtensionTypeOf(fileToValidate));
 	try
 	{
-		std::list<Tag> parsedTags = polymorphicParser->parseTagsFrom(fileToValidate);
+		std::list<Tag*> parsedTags = polymorphicParser->parseTagsFrom(fileToValidate);
 	}
 	catch (std::exception &cause)
 	{
