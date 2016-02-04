@@ -145,6 +145,14 @@ std::list<std::string> XMLTagParser::readTagAttributes(std::string currentTag)
 	return attributes;
 }
 
+Tag* XMLTagParser::getNewTagWithAttributesSet(std::string tagName, std::list<std::string> attributes, int lineNumber)
+{
+	Tag* tagBuildUp = tagSupplier.getTagFor("xml");
+	tagBuildUp->setTagName(tagName);
+	tagBuildUp->setAttributes(attributes);
+	tagBuildUp->setLineNumber(lineNumber);
+	return tagBuildUp;
+}
 
 std::list<Tag*> XMLTagParser::formTagsAsObjects(std::list<XMLTagParser::simpleTag> fullTags)
 {
@@ -155,7 +163,8 @@ std::list<Tag*> XMLTagParser::formTagsAsObjects(std::list<XMLTagParser::simpleTa
 		fullTags.pop_front();
 		std::string tagName = readTagFullName(nextTag.token);
 		std::list<std::string> attributes = readTagAttributes(nextTag.token);
-		tagDSBuilder.emplace_back(new Tag(tagName, attributes, nextTag.lineNumber));
+		Tag* xmlTag = getNewTagWithAttributesSet(tagName, attributes, nextTag.lineNumber);
+		tagDSBuilder.emplace_back(xmlTag);
 	}
 	return tagDSBuilder;
 }
