@@ -1,16 +1,18 @@
 #include "stdafx.h"
 #include "XMLTagParser.h"
 
-std::list<Tag*> XMLTagParser::getTagsAsListParsedFrom(FileParser& file)
+std::list<Tag*> XMLTagParser::getTagsAsListParsedFrom(IO* file)
 {
-	std::string unparsedText = file.getContent();
+	std::string unparsedText = file->getContent();
 	return parseFromSource(unparsedText);
 }
 
 std::list<Tag*> XMLTagParser::parseTagsFrom(std::string fileToParseFrom)
 {
-	FileParser sourceFile(fileToParseFrom);
-	return getTagsAsListParsedFrom(sourceFile);
+	//problem with following line
+	IO* source = ioHandle.getGenericIoHandle(fileToParseFrom);
+
+	return getTagsAsListParsedFrom(source);
 }
 
 XMLTagParser::XMLTagParser()

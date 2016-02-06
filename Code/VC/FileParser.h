@@ -1,7 +1,8 @@
 #pragma once
 #include <fstream>
+#include "IO.h"
 
-class FileParser
+class FileParser : public IO
 {
 	std::fstream fileHandle;
 	bool hasMoreToParse();

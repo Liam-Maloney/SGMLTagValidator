@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "TagFactory.h"
-#include "XMLTag.h"
 
 Tag* TagFactory::getTagFor(std::string syntaxType)
 {

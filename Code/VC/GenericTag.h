@@ -1,5 +1,6 @@
 #pragma once
-#include "Tag.h"
+#include <string>
+#include <list>
 
 class GenericTag
 {

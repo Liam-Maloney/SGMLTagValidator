@@ -1,6 +1,9 @@
 #pragma once
 #include "stdafx.h"
-#include "Tag.h"
+#include <string>
+#include "XMLTag.h"
+
+class Tag;
 
 class TagFactory
 {

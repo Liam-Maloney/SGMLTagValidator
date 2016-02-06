@@ -1,8 +1,5 @@
 #include "stdafx.h"
 #include "FileParser.h"
-#include <fstream>
-#include <iostream>
-#include <string>
 
 FileParser::FileParser(std::string fileToParseFrom)
 {

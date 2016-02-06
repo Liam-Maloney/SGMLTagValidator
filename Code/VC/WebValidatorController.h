@@ -1,8 +1,9 @@
 #pragma once
+#include "stdafx.h"
 #include "ParserFactory.h"
 #include "gtest\gtest.h"
-#include <fstream>
 #include <iostream>
+#include <fstream>
 
 class WebValidator
 {

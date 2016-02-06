@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Tag.h"
 
 class TagParser

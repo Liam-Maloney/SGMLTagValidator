@@ -1,6 +1,6 @@
 #pragma once
-#include "Tag.h"
 #include "GenericTag.h"
+#include "Tag.h"
 
 class XMLTag : public Tag, public GenericTag
 {

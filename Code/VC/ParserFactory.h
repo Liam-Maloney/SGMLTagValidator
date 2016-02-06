@@ -1,6 +1,7 @@
 #pragma once
-#include "TagParser.h"
 #include <string>
+#include "XMLTagParser.h"
+class TagParser;
 
 class ParserFactory
 {
