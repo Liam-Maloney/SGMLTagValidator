@@ -10,6 +10,7 @@ std::string WebValidator::fileExtensionTypeOf(std::string fileToValidate)
 std::string WebValidator::getValidationReportFor(std::string fileToValidate) 
 {
 	TagParser* polymorphicParser = parserSupplier.createParserFor(fileExtensionTypeOf(fileToValidate));
+	std::list<Tag*> parsedTags;
 	try
 	{
 		std::list<Tag*> parsedTags = polymorphicParser->parseTagsFrom(fileToValidate);
@@ -19,6 +20,8 @@ std::string WebValidator::getValidationReportFor(std::string fileToValidate)
 		std::cout << "Error: " << cause.what();
 	}
 	//TODO: Pass off the returned queue of items to be validated.
+	TagValidator* polymorphicValidator = validator.createValidatorFor(fileExtensionTypeOf(fileToValidate));
+	std::list<std::string> errors = polymorphicValidator->validateTags(parsedTags);
 	return "Nothing For Now";
 }
 
