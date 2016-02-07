@@ -1,6 +1,27 @@
 #include "stdafx.h"
 #include "XMLTag.h"
 
+
+void XMLTag::updateIsClosing(bool closing)
+{
+	this->closing = closing;
+}
+
+void XMLTag::updateRequiresClosing(bool reqClosing)
+{
+	this->reqClosing = reqClosing;
+}
+
+bool XMLTag::isClosing()
+{
+	return closing;
+}
+
+bool XMLTag::requiresClosing()
+{
+	return reqClosing;
+}
+
 void XMLTag::setAttributes(std::list<std::string> attributes)
 {
 	this->attributes = attributes;

@@ -14,5 +14,5 @@ class WebValidator
 
 	std::string fileExtensionTypeOf(std::string fileToValidate);
 public:
-	std::string getValidationReportFor(std::string fileToValidate);
+	std::list<std::string> getValidationReportFor(std::string fileToValidate);
 };

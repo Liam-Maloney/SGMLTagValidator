@@ -7,6 +7,11 @@ class XMLTag : public Tag, public GenericTag
 
 public:
 
+	void updateIsClosing(bool isClosing);
+	void updateRequiresClosing(bool requiresClosing);
+	bool isClosing();
+	bool requiresClosing();
+
 	std::list<std::string> getAttributes();
 	std::string getTagName();
 	int getLineNumber();

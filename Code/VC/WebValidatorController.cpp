@@ -7,13 +7,13 @@ std::string WebValidator::fileExtensionTypeOf(std::string fileToValidate)
 	return fileToValidate.substr(++indexOfBeginningOfFileExtention);
 }
 
-std::string WebValidator::getValidationReportFor(std::string fileToValidate) 
+std::list<std::string> WebValidator::getValidationReportFor(std::string fileToValidate) 
 {
 	TagParser* polymorphicParser = parserSupplier.createParserFor(fileExtensionTypeOf(fileToValidate));
 	std::list<Tag*> parsedTags;
 	try
 	{
-		std::list<Tag*> parsedTags = polymorphicParser->parseTagsFrom(fileToValidate);
+		parsedTags = polymorphicParser->parseTagsFrom(fileToValidate);
 	}
 	catch (std::exception &cause)
 	{
@@ -22,7 +22,7 @@ std::string WebValidator::getValidationReportFor(std::string fileToValidate)
 	//TODO: Pass off the returned queue of items to be validated.
 	TagValidator* polymorphicValidator = validator.createValidatorFor(fileExtensionTypeOf(fileToValidate));
 	std::list<std::string> errors = polymorphicValidator->validateTags(parsedTags);
-	return "Nothing For Now";
+	return errors;
 }
 
 int main(int argc, char* argv[])
@@ -30,7 +30,14 @@ int main(int argc, char* argv[])
 	::testing::InitGoogleTest(&argc, argv);
 
 	WebValidator validator;
-	validator.getValidationReportFor("test.xml");
+	std::list<std::string> validationReport = validator.getValidationReportFor("test.xml");
 
+	for each (std::string reportItem in validationReport)
+	{
+		std::cout << reportItem << std::endl;
+	}
+
+	std::cout << "\n\n\n\n\n" << std::endl;
+	system("pause");
 	return RUN_ALL_TESTS();
 }
