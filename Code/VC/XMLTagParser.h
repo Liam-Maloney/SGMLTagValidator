@@ -14,7 +14,9 @@ private:
 	TagFactory tagSupplier;
 	IOFactory ioHandle;
 
-
+	std::list<std::string> finallyGetAttributes(std::string processedAttr);
+	std::string removeSpacesAroundEquals(std::string tagWithRemovedSpaces);
+	std::string removeExtraSpaces(std::string currentTag);
 	std::list<Tag*> parseFromSource(std::string source);
 	void openFileHandleFor(std::string fileToParseFrom);
 	std::list<Tag*> formTagsAsObjects(std::list<XMLTagParser::simpleTag> fullTags);

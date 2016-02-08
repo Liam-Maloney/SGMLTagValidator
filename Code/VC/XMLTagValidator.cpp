@@ -1,8 +1,49 @@
 #include "stdafx.h"
 #include "XMLTagValidator.h"
 
+std::string XMLTagValidator::valSingAttribute(std::string currentAttr)
+{
+	std::string result = "";
+
+	//finished here, need to add in more conditionals for all the possible errors in the source
+	if (currentAttr[0] == '=')
+	{
+		result += "No name for tag: " + currentAttr + "\n";
+	}
+
+	
+
+	return result;
+}
+
+std::string XMLTagValidator::validateAttribute(std::list<std::string> attributes)
+{
+	std::string results = "";
+
+	for each (std::string currentAttr in attributes)
+	{
+		results += valSingAttribute(currentAttr);
+	}
+
+	return results;
+}
+
+std::list<std::string> XMLTagValidator::checkAttributes(std::list<Tag*> tagsToValidate)
+{
+	std::list<std::string> results;
+
+	for each(Tag* current in tagsToValidate)
+	{
+		results.emplace_back(validateAttribute(current->getAttributes()));
+	}
+
+	return results;
+}
+
 std::list<std::string> XMLTagValidator::validateTags(std::list<Tag*> tagsToValidate)
 {
+	//TODO: Element names cannot start with the letters xml (or XML, or Xml, etc)
+	//TODO: XML TAGS MUST START WITH AN _ OR A LETTER
 	//TODO: POSSIBLY RETURN THIS TO A VIEW LAYER FROM THE CONTROLLER IN LIST FORMAT
 	std::list<std::string> results;
 	results.emplace_back("Tag open/close Validation Results: \n\n");
@@ -10,6 +51,7 @@ std::list<std::string> XMLTagValidator::validateTags(std::list<Tag*> tagsToValid
 	results.splice(results.end(), tagResults);
 	results.emplace_back("\n\nValidation of tag attributes: \n\n");
 	std::list<std::string> attributeResults = checkAttributes(tagsToValidate);
+	results.splice(results.end(), attributeResults);
 	return results;
 }
 

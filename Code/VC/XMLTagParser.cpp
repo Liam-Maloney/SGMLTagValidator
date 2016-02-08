@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "XMLTagParser.h"
 
+#include <iostream>
+
 std::list<Tag*> XMLTagParser::getTagsAsListParsedFrom(IO* file)
 {
 	std::string unparsedText = file->getContent();
@@ -116,59 +118,163 @@ std::string XMLTagParser::readTagFullName(std::string fullTag)
 	return tagName;
 }
 
-//TODO: Refactor
 
-std::list<std::string> XMLTagParser::readTagAttributes(std::string currentTag)
+std::string XMLTagParser::removeExtraSpaces(std::string currentTag)
 {
-	std::list<std::string> attributes;
-	std::string attributeBuilder = "";
-	bool firstSpaceNotEncountered = true;
-	bool skipConsecutiveSpacesTag = false;
-	bool notParsingInsideQuotes = true;
-	const int CHOP_LAST_BRACKET = 1;
-
-	for (int i = 0; i < currentTag.length() - CHOP_LAST_BRACKET; i++)
+	std::string processedTag = "";
+	bool insideQuotes = false;
+	bool skipSpaces = false;
+	for (int i = 0; i < currentTag.length(); i++)
 	{
-		if (firstSpaceNotEncountered)
+		if (insideQuotes)
 		{
-			if (currentTag[i] == ' ')
+			if (currentTag[i] == '"')
 			{
-				firstSpaceNotEncountered = false;
-			}
-		}
-		else if (currentTag[i] == '"')
-		{
-			if (notParsingInsideQuotes)
-			{
-				notParsingInsideQuotes = false;
-				attributeBuilder += currentTag[i];
+				insideQuotes = false;
+				processedTag += '"';
 			}
 			else
 			{
-				notParsingInsideQuotes = true;
-				attributeBuilder += currentTag[i];
-			}
-		}
-		else if (currentTag[i] == ' ' && notParsingInsideQuotes)
-		{
-			if (skipConsecutiveSpacesTag == true)
-			{
-
-			}
-			else
-			{
-				skipConsecutiveSpacesTag = true;
-				attributes.emplace_back(attributeBuilder);
-				attributeBuilder = "";
+				processedTag += currentTag[i];
 			}
 		}
 		else
 		{
-			skipConsecutiveSpacesTag = false;
-			attributeBuilder += currentTag[i];
+			if (currentTag[i] == ' ')
+			{
+				if (!skipSpaces)
+				{
+					processedTag += currentTag[i];
+					skipSpaces = true;
+				}
+			}
+			else if (currentTag[i] == '"')
+			{
+				insideQuotes = true;
+				processedTag += currentTag[i];
+			}
+			else
+			{
+				skipSpaces = false;
+				processedTag += currentTag[i];
+			}
 		}
 	}
-	attributes.emplace_back(attributeBuilder);
+	return processedTag;
+}
+
+std::string XMLTagParser::removeSpacesAroundEquals(std::string tagWithRemovedSpaces)
+{
+	std::string processed = "";
+	int i = 0;
+	bool justParsedName = true;
+
+	//skips the name of the tag
+	while (tagWithRemovedSpaces[i] != ' ' && tagWithRemovedSpaces[i] != '=' && tagWithRemovedSpaces[i] != '"' && tagWithRemovedSpaces[i] != '>')
+	{
+		processed += tagWithRemovedSpaces[i];
+		i++;
+	}
+
+	if (i != tagWithRemovedSpaces.length())
+	{
+		processed += ' ';
+	}
+	else if (tagWithRemovedSpaces[i] == '>')
+	{
+		processed += '>';
+	}
+
+	while (i < tagWithRemovedSpaces.length())
+	{
+		if (tagWithRemovedSpaces[i] == ' ')
+		{
+			if (tagWithRemovedSpaces[i + 1] == '=' || tagWithRemovedSpaces[i - 1] == '=')
+			{
+
+			}
+			else
+			{
+				if (!justParsedName)
+				{
+					processed += tagWithRemovedSpaces[i];
+				}
+			}
+			i++;
+		}
+		else
+		{
+			if (tagWithRemovedSpaces[i] == '"')
+			{
+				int substringTo = tagWithRemovedSpaces.find_first_of('"', i + 1);
+
+				std::string contentsOfQuotes = tagWithRemovedSpaces.substr(i, (substringTo - i) + 1);
+				processed += contentsOfQuotes;
+				i = (tagWithRemovedSpaces.find('"', i + 1));
+				i++;
+			}
+			else
+			{
+				processed += tagWithRemovedSpaces[i];
+				i++;
+			}
+		}
+		justParsedName = false;
+	}
+	
+	return processed;
+}
+
+//TODO:RENAME
+std::list<std::string> XMLTagParser::finallyGetAttributes(std::string processedAttr)
+{
+	std::list<std::string> listOfAttributes;
+	std::string currentAttr = "";
+	bool notPastNameTag = true;
+	bool insideQuotes = false;
+	for (int i = 0; i < processedAttr.length(); i++)
+	{
+		if (notPastNameTag)
+		{
+			if (processedAttr[i] == ' ' || processedAttr[i] == '"' || processedAttr[i] == '=')
+				notPastNameTag = false;
+		}
+		else
+		{
+			if (insideQuotes)
+			{
+				currentAttr += processedAttr[i];
+				if (processedAttr[i] == '"')
+					insideQuotes = false;
+			}
+			else
+			{
+				if (processedAttr[i] == ' ' || i == processedAttr.length()-1)
+				{
+					listOfAttributes.emplace_back(currentAttr);
+					currentAttr = "";
+				}
+				else if (processedAttr[i] == '"'){
+					insideQuotes = true;
+					currentAttr += processedAttr[i];
+				}
+				else{
+					currentAttr += processedAttr[i];
+				}
+					
+			}
+			
+		}
+	}
+	return listOfAttributes;
+}
+//TODO: Refactor
+
+std::list<std::string> XMLTagParser::readTagAttributes(std::string currentTag)
+{
+	std::string tagWithRemovedSpaces = removeExtraSpaces(currentTag);
+	std::string minValidString = removeSpacesAroundEquals(tagWithRemovedSpaces);
+	std::list<std::string> attributes = finallyGetAttributes(minValidString);
 	return attributes;
 }
 
@@ -234,3 +340,12 @@ std::list<Tag*> XMLTagParser::parseFromSource(std::string source)
 	std::list<Tag*> parsedTags = formTagsAsObjects(fullTags);
 	return parsedTags;
 }
+
+
+using namespace std;
+class Point {
+public:	double x, y;
+};
+class Vector {
+public:	Point start, end;
+};
