@@ -63,7 +63,7 @@ std::list<std::string> XMLTagValidator::checkTagPairs(std::list<Tag*> tagsToChec
 	{
 		if (current->isClosing())
 		{
-			
+
 			if (bracketPairs.top()->getTagName() != current->getTagName())
 			{
 				//TODO: ADD IN A METHOD TO HANDLE THE ERROR REPORTING

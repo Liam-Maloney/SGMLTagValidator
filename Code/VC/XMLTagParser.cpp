@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "XMLTagParser.h"
 
-#include <iostream>
-
 std::list<Tag*> XMLTagParser::getTagsAsListParsedFrom(IO* file)
 {
 	std::string unparsedText = file->getContent();
@@ -29,68 +27,158 @@ struct XMLTagParser::simpleTag
 	bool tagIsSelfClosingTag;
 };
 
-std::list<XMLTagParser::simpleTag> tokenizeTags(std::string source)
+bool XMLTagParser::isValidSymbol(char current)
+{
+	if ((current >= 'A' && current <= 'Z') || (current >= 'a' && current <= 'z'))
+	{
+		return true;
+	}
+
+	switch (current)
+	{
+		case '<':
+		case '>':
+		case ' ':
+		case '=':
+		case '"':
+			return true;
+			break;
+	}
+}
+
+std::queue<int> XMLTagParser::getOrder(std::string source)
+{
+	std::queue<int> orderedInputSymbols;
+	for (int i = 0; i < source.length(); i++)
+	{
+		char current = source[i];
+		
+		if (isValidSymbol(current))
+		{
+
+		}
+	}
+	return orderedInputSymbols;
+}
+
+std::list<XMLTagParser::simpleTag> XMLTagParser::tokenizeTags(std::string source)
 {
 	std::list<XMLTagParser::simpleTag> tokens;
 	int lineNumber = 1;
 	std::string contentsOfTag = "";
+	
 	bool tagStarted = false;
 	bool buildingTag = true;
 	bool isAClosingTag = false;
 	bool requiresAClosingTag = true;
 
-	//TODO: FIX PARSING OF TAGS WITH ONE ATTRIBUTE
+	int i = source.find_first_of('<');
+	int missingFirstOpenTag = source.find_first_of('>');
 
-	for (unsigned int i = 0; i < source.length(); i++)
+	if (missingFirstOpenTag < i)
 	{
-		if (source[i] == '\n')
+		if (missingFirstOpenTag != -1)
 		{
-			lineNumber++;
-		}
-
-		if (source[i] == '<')
-		{
-			tagStarted = true;
-			contentsOfTag += source[i];
-			if (source[i + 1] == '/')
-			{
-				isAClosingTag = true;
-				//TODO: REMOVE THE DUPLICATION IN LOGIC HERE, I SHOULD ONLY NEED ONE POTENTIALL!!!
-				requiresAClosingTag = false;
-				//TODO: REFACTOR; CONTINUE IS SKIPPING THE '/' CHARACTER AT THE START OF A CLOSING TAG
-				continue;
-			}
-		}
-		else if (tagStarted && source[i] != '>')
-		{
-			if (source[i] != '/')
-			{
-				contentsOfTag += source[i];
-			}
-
-			if (source[i - 1] == '/' || source[i - 1] == '?')
-			{
-				requiresAClosingTag = false;
-			}
-		}
-		else if (source[i] == '>')
-		{
-			tagStarted = false;
-			buildingTag = false;
-			contentsOfTag += source[i];
-			XMLTagParser::simpleTag nextTag;
-			nextTag.token = contentsOfTag;
-			nextTag.lineNumber = lineNumber;
-			nextTag.tagIsClosingTag = isAClosingTag;
-			//TODO: CHANGE THIS SO THAT I DON'T NEED TO DO THE NEGATION 
-			//THERE IS A CONFLICT IN THE VARIABLE NAMES WHICH MAKES THE ASSINMENT AMBIGUOUS!
-			nextTag.tagIsSelfClosingTag = !requiresAClosingTag;
-			tokens.emplace_back(nextTag);
-			contentsOfTag = "";
-			requiresAClosingTag = true;
-			isAClosingTag = false;
+			i = missingFirstOpenTag;
 		}
 	}
+
+	if (i == -1)
+	{
+		i = source.find_first_of('>');
+	}
+
+	for (; i < source.length(); i++)
+	{
+		if (source[i] == '"')
+		{
+			int indexOfNextQuote = source.find_first_of('"', i + 1);
+			if (indexOfNextQuote == -1)
+			{
+				indexOfNextQuote = source.length() - 1;
+			}
+			int length = indexOfNextQuote - i;
+			contentsOfTag += source.substr(i, length + 1);
+			i = indexOfNextQuote;
+			
+		}
+		else
+		{
+			if (source[i] == '\n')
+			{
+				lineNumber++;
+			}
+
+			if (source[i] == '<')
+			{
+				if (tagStarted)
+				{
+					//save the previous tag as it was not closed, this is a syntax error
+					XMLTagParser::simpleTag nextTag;
+					nextTag.token = contentsOfTag;
+					nextTag.lineNumber = lineNumber;
+					nextTag.tagIsClosingTag = isAClosingTag;
+					nextTag.tagIsSelfClosingTag = !requiresAClosingTag;
+					tokens.emplace_back(nextTag);
+					contentsOfTag = "";
+					requiresAClosingTag = true;
+					isAClosingTag = false;
+				}
+				tagStarted = true;
+				contentsOfTag += source[i];
+				if (source[i + 1] == '/')
+				{
+					isAClosingTag = true;
+					//TODO: REMOVE THE DUPLICATION IN LOGIC HERE, I SHOULD ONLY NEED ONE POTENTIALL!!!
+					requiresAClosingTag = false;
+					//TODO: REFACTOR; CONTINUE IS SKIPPING THE '/' CHARACTER AT THE START OF A CLOSING TAG
+					continue;
+				}
+			}
+			else if (tagStarted && source[i] != '>')
+			{
+				if (source[i] != '/')
+				{
+					contentsOfTag += source[i];
+				}
+
+				if (source[i - 1] == '/' || source[i - 1] == '?')
+				{
+					requiresAClosingTag = false;
+				}
+			}
+			else if (source[i] == '>')
+			{
+				tagStarted = false;
+				buildingTag = false;
+				contentsOfTag += source[i];
+				XMLTagParser::simpleTag nextTag;
+				nextTag.token = contentsOfTag;
+				nextTag.lineNumber = lineNumber;
+				nextTag.tagIsClosingTag = isAClosingTag;
+				//TODO: CHANGE THIS SO THAT I DON'T NEED TO DO THE NEGATION 
+				//THERE IS A CONFLICT IN THE VARIABLE NAMES WHICH MAKES THE ASSINMENT AMBIGUOUS!
+				nextTag.tagIsSelfClosingTag = !requiresAClosingTag;
+				tokens.emplace_back(nextTag);
+				contentsOfTag = "";
+				requiresAClosingTag = true;
+				isAClosingTag = false;
+			}
+		}
+	}
+	
+	if (contentsOfTag.length() != 0 && contentsOfTag[contentsOfTag.length() -1] != '>')
+	{
+		XMLTagParser::simpleTag nextTag;
+		nextTag.token = contentsOfTag;
+		nextTag.lineNumber = lineNumber;
+		nextTag.tagIsClosingTag = isAClosingTag;
+		//TODO: CHANGE THIS SO THAT I DON'T NEED TO DO THE NEGATION 
+		//THERE IS A CONFLICT IN THE VARIABLE NAMES WHICH MAKES THE ASSINMENT AMBIGUOUS!
+		nextTag.tagIsSelfClosingTag = !requiresAClosingTag;
+		tokens.emplace_back(nextTag);
+	}
+	
 	return tokens;
 }
 
@@ -111,9 +199,16 @@ std::string XMLTagParser::readTagFullName(std::string fullTag)
 {
 	const int SKIP_FIRST_BRACKET = 1;
 	std::string tagName = "";
-	for (int i = SKIP_FIRST_BRACKET; notAtEndOfName(fullTag[i]); i++)
+	if (fullTag[0] == '>')
 	{
-		tagName += fullTag[i];
+		return ">";
+	}
+	else
+	{
+		for (int i = SKIP_FIRST_BRACKET; notAtEndOfName(fullTag[i]); i++)
+		{
+			tagName += fullTag[i];
+		}
 	}
 	return tagName;
 }
@@ -287,7 +382,7 @@ Tag* XMLTagParser::getNewTagWithAttributesSet(std::string tagName, std::list<std
 	
 	//TODO: REFACTOR
 
-	if (tagName[1] == '/')
+	if (tagName.length() != 0 && tagName[1] == '/')
 	{
 		tagBuildUp->updateIsClosing(true);
 	}
@@ -340,12 +435,3 @@ std::list<Tag*> XMLTagParser::parseFromSource(std::string source)
 	std::list<Tag*> parsedTags = formTagsAsObjects(fullTags);
 	return parsedTags;
 }
-
-
-using namespace std;
-class Point {
-public:	double x, y;
-};
-class Vector {
-public:	Point start, end;
-};

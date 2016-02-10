@@ -4,7 +4,7 @@
 std::string WebValidator::fileExtensionTypeOf(std::string fileToValidate)
 {
 	size_t indexOfBeginningOfFileExtention = fileToValidate.find_last_of(".");
-	return fileToValidate.substr(++indexOfBeginningOfFileExtention);
+	return fileToValidate.substr(++indexOfBeginningOfFileExtention, fileToValidate.length() - indexOfBeginningOfFileExtention);
 }
 
 std::list<std::string> WebValidator::getValidationReportFor(std::string fileToValidate) 
@@ -25,12 +25,13 @@ std::list<std::string> WebValidator::getValidationReportFor(std::string fileToVa
 	return errors;
 }
 
+/*
 int main(int argc, char* argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);
 
 	WebValidator validator;
-	std::list<std::string> validationReport = validator.getValidationReportFor("test.xml");
+	std::list<std::string> validationReport = validator.getValidationReportFor("webpage.xml");
 
 	for each (std::string reportItem in validationReport)
 	{
@@ -41,3 +42,4 @@ int main(int argc, char* argv[])
 	system("pause");
 	return RUN_ALL_TESTS();
 }
+*/
