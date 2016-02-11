@@ -39,10 +39,13 @@ TEST_P(XMLTagParserTest, CountOfTagsParsed)
 	ASSERT_EQ(testResults.size(), parameters.expectedNumOfTags) << "\nTest Failed on: " << parameters.simulatedInput;
 }
 
+
 INSTANTIATE_TEST_CASE_P(default, XMLTagParserTest,
 	testing::Values(
 	//Parameterised Tests take form:
 	//	{"input", expected num of tags parsed from that input}
+	XMLTagCountParams{ "<s></s t=\"a\">", 2 },
+	XMLTagCountParams{"<this is=\"atest\">", 1 },
 	XMLTagCountParams{ "   ", 0 },
 	XMLTagCountParams{ "", 0 },
 	XMLTagCountParams{ ">a <b <>", 3 },
@@ -151,6 +154,78 @@ INSTANTIATE_TEST_CASE_P(default, SingleParseTagContents,
 	XMLSingleParseContentsParam{ "<this><test has=\"many\"></test><and this=\"is\" multiple=\"spaces\"></and></this>", {"this", "test", "test", "and", "and", "this"} }	
 	)
 );
+
+//------------------------- TESTING THE ATTRIBUTES WHICH ARE IN THE TAGS POST PARSING -----------
+
+struct XMLAttributeContentsParam
+{
+	std::string simulatedInput;
+	std::string expectedAttrContents[100];
+};
+
+class ContentsOfAttributes : public testing::Test, public testing::WithParamInterface<XMLAttributeContentsParam>{
+public:
+	XMLTagParser* ioParseTestInstance; //class under test
+	XMLAttributeContentsParam parameters = GetParam();
+	IO* simulatedInputHandle;
+};
+
+TEST_P(ContentsOfAttributes, ContentsOfAttributes)
+{
+	SimulatedIO simulatedInputSupplier(parameters.simulatedInput);
+	simulatedInputHandle = &simulatedInputSupplier;
+	std::list<Tag*> testResults = ioParseTestInstance->getTagsAsListParsedFrom(simulatedInputHandle);
+
+	int i = 0;
+	std::list<std::string> attrResults;
+	std::string expected;
+	std::string actual;
+	for each (Tag* currentTag in testResults)
+	{
+		attrResults = currentTag->getAttributes();
+		if (attrResults.empty())
+		{
+			i++;
+		}
+		else
+		{
+			for each (std::string currentAttribute in attrResults)
+			{
+				expected = parameters.expectedAttrContents[i];
+				actual = currentAttribute;
+				if (expected != actual)
+				{
+					ASSERT_EQ(expected, actual) << "\nTest Failed on: " << parameters.simulatedInput << " at attribute " << i << ": " << expected;
+				}
+				i++;
+			}
+		}
+	}
+	ASSERT_EQ(1, 1);
+}
+
+
+INSTANTIATE_TEST_CASE_P(default, ContentsOfAttributes,
+	testing::Values(
+	//Parameterised Tests take form:
+	//	{"input", {"tagname", "tagname", "tagname"}}
+	XMLAttributeContentsParam{ "<a test= test2= >", { "test=", "test=" } },
+	XMLAttributeContentsParam{ "<simple test=\"is\"></simple>", {"test=\"is\""} },
+	XMLAttributeContentsParam{ "<s></s t=\"a\">", { "", "t=\"a\"" } },
+	XMLAttributeContentsParam{ "<s   t=\"a\"", { "t=\"a\"" } },
+	XMLAttributeContentsParam{ "<s t=\"a\" s=\"a\"", { "t=\"a\"", "s=\"a\"" } },
+	XMLAttributeContentsParam{ "<s t=\"a\" t=\"a\" tsdf=\"as  df\">", { "t=\"a\"", "t=\"a\"", "tsdf=\"as  df\"" } },
+	XMLAttributeContentsParam{ "tsdf=\"as  df\"", { "" } }, //no attribute here as all occurs outside tag
+	XMLAttributeContentsParam{ "<a test=>", { "test=" } },
+	XMLAttributeContentsParam{ "<a test>", { "test" } },
+	XMLAttributeContentsParam{ "<a =\"test\" >", { "=\"test\"" } },
+	XMLAttributeContentsParam{ "<a \"test\">", { "\"test\"" } },
+	XMLAttributeContentsParam{ "", { "" } },
+	XMLAttributeContentsParam{ "", { "" } }
+	)
+	);
+	
+
 
 int main(int argc, char* argv[])
 {

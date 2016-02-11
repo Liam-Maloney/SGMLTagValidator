@@ -33,8 +33,9 @@ private:
 	std::list<std::string> readTagAttributes(std::string currentTag);
 	std::string readTagFullName(std::string fullTag);
 	Tag* getNewTagWithAttributesSet(std::string tagName, std::list<std::string> attributes, int lineNumber);
-	std::queue<int> getOrder(std::string source);
+	std::queue<queueEntry> getOrder(std::string source);
 	std::list<XMLTagParser::simpleTag> tokenizeTags(std::string source);
+	XMLTagParser::queueEntry XMLTagParser::getNextQuoteFrom(std::queue<queueEntry>* orderedSyntax);
 public:
 	
 	std::list<Tag*> getTagsAsListParsedFrom(IO* inputSource);

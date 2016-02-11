@@ -29,33 +29,30 @@ struct XMLTagParser::simpleTag
 
 bool XMLTagParser::isValidSymbol(char current)
 {
-	if ((current >= 'A' && current <= 'Z') || (current >= 'a' && current <= 'z'))
-	{
-		return true;
-	}
-
 	switch (current)
 	{
-		case '<':
-		case '>':
 		case ' ':
 		case '=':
 		case '"':
 			return true;
 			break;
 	}
+	return false;
 }
 
-std::queue<int> XMLTagParser::getOrder(std::string source)
+std::queue<XMLTagParser::queueEntry> XMLTagParser::getOrder(std::string source)
 {
-	std::queue<int> orderedInputSymbols;
+	std::queue<queueEntry> orderedInputSymbols;
 	for (int i = 0; i < source.length(); i++)
 	{
 		char current = source[i];
 		
 		if (isValidSymbol(current))
 		{
-
+			queueEntry newEntry;
+			newEntry.index = i;
+			newEntry.symbol = source[i];
+			orderedInputSymbols.push(newEntry);
 		}
 	}
 	return orderedInputSymbols;
@@ -320,47 +317,127 @@ std::string XMLTagParser::removeSpacesAroundEquals(std::string tagWithRemovedSpa
 	return processed;
 }
 
+//todo move these inside the class itself instread of being external functions
+
+bool encounteredASpace(char testChar)
+{
+	return (testChar == ' ') ? true : false;
+}
+
+bool encounteredAQuote(char testChar)
+{
+	return (testChar == '"') ? true : false;
+}
+
+bool encounteredAnEquals(char testChar)
+{
+	return (testChar == '=') ? true : false;
+}
+
+void addAttributeEntryParsedFrom(int startParse, int endParse, std::string processedAttr, std::list<std::string>* listOfAttributes)
+{
+	listOfAttributes->emplace_back(processedAttr.substr(startParse + 1, endParse - startParse));
+}
+
+XMLTagParser::queueEntry XMLTagParser::getNextQuoteFrom(std::queue<queueEntry>* orderedSyntax)
+{
+	while (orderedSyntax->front().symbol != '"')
+	{
+		orderedSyntax->pop();
+	}
+
+	queueEntry nextQuote = orderedSyntax->front();
+	orderedSyntax->pop();
+	return nextQuote;
+}
+
 //TODO:RENAME
 std::list<std::string> XMLTagParser::finallyGetAttributes(std::string processedAttr)
 {
 	std::list<std::string> listOfAttributes;
 	std::string currentAttr = "";
-	bool notPastNameTag = true;
-	bool insideQuotes = false;
-	for (int i = 0; i < processedAttr.length(); i++)
+	std::queue<queueEntry> orderedSyntax = getOrder(processedAttr);
+
+	//discard first space, as it is our starting point
+	
+	bool alreadyGotSpace = true; //needs to be true as I have encounter a space implicityly at the begging of the algorithms
+	bool alreadyGotQuote = false;
+	bool alreadyGotEquals = false;
+	int beginningOfParse = 0;
+	int toEndOfParse = 0;
+
+	if (orderedSyntax.empty())
 	{
-		if (notPastNameTag)
+		return listOfAttributes;
+	}
+
+	queueEntry skipTagName = orderedSyntax.front();
+	orderedSyntax.pop();
+
+	beginningOfParse = skipTagName.index;
+
+	while (!orderedSyntax.empty())
+	{
+		queueEntry inCurrent = orderedSyntax.front();
+		orderedSyntax.pop();
+
+		if (!orderedSyntax.empty())
 		{
-			if (processedAttr[i] == ' ' || processedAttr[i] == '"' || processedAttr[i] == '=')
-				notPastNameTag = false;
-		}
-		else
-		{
-			if (insideQuotes)
+
+			if (encounteredASpace(inCurrent.symbol)) //think inside here is ok
 			{
-				currentAttr += processedAttr[i];
-				if (processedAttr[i] == '"')
-					insideQuotes = false;
-			}
-			else
-			{
-				if (processedAttr[i] == ' ' || i == processedAttr.length()-1)
+				if (alreadyGotSpace || alreadyGotEquals){
+					//then this tag has an error so i should add what exists in the current and restart
+					toEndOfParse = inCurrent.index;
+					addAttributeEntryParsedFrom(beginningOfParse, toEndOfParse, processedAttr, &listOfAttributes);
+					alreadyGotEquals = false;
+					beginningOfParse = inCurrent.index;
+					alreadyGotSpace = false;
+				}
+				else
 				{
-					listOfAttributes.emplace_back(currentAttr);
-					currentAttr = "";
+					beginningOfParse = inCurrent.index;
+					alreadyGotSpace = true;
 				}
-				else if (processedAttr[i] == '"'){
-					insideQuotes = true;
-					currentAttr += processedAttr[i];
-				}
-				else{
-					currentAttr += processedAttr[i];
-				}
-					
 			}
-			
+			else if (encounteredAnEquals(inCurrent.symbol))
+			{
+				if (alreadyGotSpace)
+				{
+					//this is the happy path, we now expect a quote next
+					alreadyGotEquals = true;
+					toEndOfParse = inCurrent.index;
+				}
+				else if (alreadyGotEquals)
+				{
+					//this means we have encountered another error
+					toEndOfParse = inCurrent.index;
+					addAttributeEntryParsedFrom(beginningOfParse, toEndOfParse, processedAttr, &listOfAttributes);
+					alreadyGotEquals = false;
+					alreadyGotSpace = false;
+					beginningOfParse = inCurrent.index;
+				}
+				else
+				{
+					//this case means that the attribute that attribute we start here will not have an attribute name
+					beginningOfParse = inCurrent.index;
+				}
+			}
+			else if (encounteredAQuote(inCurrent.symbol))
+			{
+				//if (alreadyGotEquals && alreadyGotSpace)
+				//{
+				inCurrent = getNextQuoteFrom(&orderedSyntax);
+				toEndOfParse = inCurrent.index;
+				addAttributeEntryParsedFrom(beginningOfParse, toEndOfParse, processedAttr, &listOfAttributes);
+				alreadyGotEquals = false;
+				alreadyGotQuote = false;
+				beginningOfParse = ++toEndOfParse; // move each past the previously parsed attribute
+				alreadyGotSpace = false;
+			}
 		}
 	}
+
 	return listOfAttributes;
 }
 //TODO: Refactor
