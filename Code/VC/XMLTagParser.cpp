@@ -68,7 +68,7 @@ std::list<XMLTagParser::simpleTag> XMLTagParser::tokenizeTags(std::string source
 	bool buildingTag = true;
 	bool isAClosingTag = false;
 	bool requiresAClosingTag = true;
-
+	int countOfQuotes = 0;
 	int i = source.find_first_of('<');
 	int missingFirstOpenTag = source.find_first_of('>');
 
@@ -89,6 +89,7 @@ std::list<XMLTagParser::simpleTag> XMLTagParser::tokenizeTags(std::string source
 	{
 		if (source[i] == '"')
 		{
+			countOfQuotes++;
 			int indexOfNextQuote = source.find_first_of('"', i + 1);
 			if (indexOfNextQuote == -1)
 			{
@@ -164,7 +165,7 @@ std::list<XMLTagParser::simpleTag> XMLTagParser::tokenizeTags(std::string source
 		}
 	}
 	
-	if (contentsOfTag.length() != 0 && contentsOfTag[contentsOfTag.length() -1] != '>')
+	if (contentsOfTag.length() != 0 )//&& contentsOfTag[contentsOfTag.length() -1] != '>')
 	{
 		XMLTagParser::simpleTag nextTag;
 		nextTag.token = contentsOfTag;
@@ -176,6 +177,9 @@ std::list<XMLTagParser::simpleTag> XMLTagParser::tokenizeTags(std::string source
 		tokens.emplace_back(nextTag);
 	}
 	
+	
+	
+
 	return tokens;
 }
 
@@ -300,10 +304,22 @@ std::string XMLTagParser::removeSpacesAroundEquals(std::string tagWithRemovedSpa
 			{
 				int substringTo = tagWithRemovedSpaces.find_first_of('"', i + 1);
 
+				if (substringTo == -1) //unclosed quotes error
+				{
+					substringTo = tagWithRemovedSpaces.length() - 1;
+				}
+
 				std::string contentsOfQuotes = tagWithRemovedSpaces.substr(i, (substringTo - i) + 1);
 				processed += contentsOfQuotes;
 				i = (tagWithRemovedSpaces.find('"', i + 1));
+				
+				if (i == -1)
+				{
+					return processed;
+				}
+
 				i++;
+
 			}
 			else
 			{
@@ -336,7 +352,22 @@ bool encounteredAnEquals(char testChar)
 
 void addAttributeEntryParsedFrom(int startParse, int endParse, std::string processedAttr, std::list<std::string>* listOfAttributes)
 {
-	listOfAttributes->emplace_back(processedAttr.substr(startParse + 1, endParse - startParse));
+	std::string tagWithWhiteSpace = processedAttr.substr(startParse, endParse - startParse + 1);
+	if (tagWithWhiteSpace == " ")
+	{
+		return;
+	}
+	if (tagWithWhiteSpace[0] == ' ')
+	{
+		int startIndex = tagWithWhiteSpace.find_first_not_of(' ');
+		std::string tagWithoutWhitespace = tagWithWhiteSpace.substr(startIndex, tagWithoutWhitespace.length() - startIndex);
+
+		listOfAttributes->emplace_back(tagWithoutWhitespace);
+	}
+	else
+	{
+		listOfAttributes->emplace_back(tagWithWhiteSpace);
+	}
 }
 
 XMLTagParser::queueEntry XMLTagParser::getNextQuoteFrom(std::queue<queueEntry>* orderedSyntax)
@@ -365,6 +396,15 @@ std::list<std::string> XMLTagParser::finallyGetAttributes(std::string processedA
 	bool alreadyGotEquals = false;
 	int beginningOfParse = 0;
 	int toEndOfParse = 0;
+	int countOfQuotes = 0;
+
+	for (int i = 0; i < processedAttr.length(); i++)
+	{
+		if (processedAttr[i] == '"')
+		{
+			countOfQuotes++;
+		}
+	}
 
 	if (orderedSyntax.empty())
 	{
@@ -376,8 +416,11 @@ std::list<std::string> XMLTagParser::finallyGetAttributes(std::string processedA
 
 	beginningOfParse = skipTagName.index;
 
+	bool skippedLoop = true;
+
 	while (!orderedSyntax.empty())
 	{
+		skippedLoop = false;
 		queueEntry inCurrent = orderedSyntax.front();
 		orderedSyntax.pop();
 
@@ -389,7 +432,7 @@ std::list<std::string> XMLTagParser::finallyGetAttributes(std::string processedA
 				if (alreadyGotSpace || alreadyGotEquals){
 					//then this tag has an error so i should add what exists in the current and restart
 					toEndOfParse = inCurrent.index;
-					addAttributeEntryParsedFrom(beginningOfParse, toEndOfParse, processedAttr, &listOfAttributes);
+					addAttributeEntryParsedFrom(beginningOfParse, toEndOfParse-1, processedAttr, &listOfAttributes);
 					alreadyGotEquals = false;
 					beginningOfParse = inCurrent.index;
 					alreadyGotSpace = false;
@@ -421,6 +464,10 @@ std::list<std::string> XMLTagParser::finallyGetAttributes(std::string processedA
 				{
 					//this case means that the attribute that attribute we start here will not have an attribute name
 					beginningOfParse = inCurrent.index;
+					if (processedAttr[toEndOfParse] == ' ')
+					{
+						std::swap(toEndOfParse, beginningOfParse);
+					}
 				}
 			}
 			else if (encounteredAQuote(inCurrent.symbol))
@@ -435,6 +482,22 @@ std::list<std::string> XMLTagParser::finallyGetAttributes(std::string processedA
 				beginningOfParse = ++toEndOfParse; // move each past the previously parsed attribute
 				alreadyGotSpace = false;
 			}
+		}
+	}
+
+	if ((toEndOfParse != processedAttr.length()) && (!alreadyGotSpace))
+	{
+		addAttributeEntryParsedFrom(toEndOfParse, (processedAttr.length() - 2), processedAttr, &listOfAttributes);
+	}
+
+	if (countOfQuotes % 2 != 0) //must be a missing quote
+	{
+		std::string noClosingQuotesString = processedAttr.substr(beginningOfParse, processedAttr.length() - beginningOfParse);
+		if (noClosingQuotesString[0] == ' ')
+		{
+			int startIndex = noClosingQuotesString.find_first_not_of(' ');
+			std::string tagWithoutWhitespace = noClosingQuotesString.substr(startIndex, tagWithoutWhitespace.length() - startIndex);
+			listOfAttributes.emplace_back(tagWithoutWhitespace);
 		}
 	}
 

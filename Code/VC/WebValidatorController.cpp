@@ -25,13 +25,12 @@ std::list<std::string> WebValidator::getValidationReportFor(std::string fileToVa
 	return errors;
 }
 
-/*
 int main(int argc, char* argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);
 
 	WebValidator validator;
-	std::list<std::string> validationReport = validator.getValidationReportFor("webpage.xml");
+	std::list<std::string> validationReport = validator.getValidationReportFor("test.xml");
 
 	for each (std::string reportItem in validationReport)
 	{
@@ -42,4 +41,3 @@ int main(int argc, char* argv[])
 	system("pause");
 	return RUN_ALL_TESTS();
 }
-*/

@@ -44,6 +44,7 @@ INSTANTIATE_TEST_CASE_P(default, XMLTagParserTest,
 	testing::Values(
 	//Parameterised Tests take form:
 	//	{"input", expected num of tags parsed from that input}
+	XMLTagCountParams{"<this is=\"a\" test></this of=\"correctness\">", 2},
 	XMLTagCountParams{ "<s></s t=\"a\">", 2 },
 	XMLTagCountParams{"<this is=\"atest\">", 1 },
 	XMLTagCountParams{ "   ", 0 },
@@ -176,6 +177,11 @@ TEST_P(ContentsOfAttributes, ContentsOfAttributes)
 	simulatedInputHandle = &simulatedInputSupplier;
 	std::list<Tag*> testResults = ioParseTestInstance->getTagsAsListParsedFrom(simulatedInputHandle);
 
+	if (testResults.empty())
+	{
+		ASSERT_EQ(1, 2) << parameters.simulatedInput << " : Cannot test when we expect there to be no attributes";
+	}
+
 	int i = 0;
 	std::list<std::string> attrResults;
 	std::string expected;
@@ -209,26 +215,28 @@ INSTANTIATE_TEST_CASE_P(default, ContentsOfAttributes,
 	testing::Values(
 	//Parameterised Tests take form:
 	//	{"input", {"tagname", "tagname", "tagname"}}
+	//XMLAttributeContentsParam{ "", { "" } },
+	XMLAttributeContentsParam{ "<name type=\"text>Liam</name>", { "type=\"text>Liam</name>" } },
+	XMLAttributeContentsParam{ "<person test test2= \"works\" =\"tesmt\"  >", { "test", "test2=\"works\"", "=\"tesmt\"" } },
+	XMLAttributeContentsParam{ "<this is=\"a\" test></this of=\"correctness\">", { "is=\"a\"", "test", "of=\"correctness\"" } },
+	XMLAttributeContentsParam{ "<\"test\">", { "\"test\"" } },
+	XMLAttributeContentsParam{ "<hello =\"this\">", { "=\"this\"" } },
+	XMLAttributeContentsParam{ "<hello =this", { "=", "this" } },
+	XMLAttributeContentsParam{ "\"hi\" <only one>", { "one" } },
+	XMLAttributeContentsParam{ "test <is test>   t <and test2>", { "test", "test2" } },
+	XMLAttributeContentsParam{ "< t ", { "t" } },
+	XMLAttributeContentsParam{ "<  test>", { "test" } },
 	XMLAttributeContentsParam{ "<a test= test2= >", { "test=", "test=" } },
 	XMLAttributeContentsParam{ "<simple test=\"is\"></simple>", {"test=\"is\""} },
 	XMLAttributeContentsParam{ "<s></s t=\"a\">", { "", "t=\"a\"" } },
 	XMLAttributeContentsParam{ "<s   t=\"a\"", { "t=\"a\"" } },
 	XMLAttributeContentsParam{ "<s t=\"a\" s=\"a\"", { "t=\"a\"", "s=\"a\"" } },
 	XMLAttributeContentsParam{ "<s t=\"a\" t=\"a\" tsdf=\"as  df\">", { "t=\"a\"", "t=\"a\"", "tsdf=\"as  df\"" } },
-	XMLAttributeContentsParam{ "tsdf=\"as  df\"", { "" } }, //no attribute here as all occurs outside tag
 	XMLAttributeContentsParam{ "<a test=>", { "test=" } },
 	XMLAttributeContentsParam{ "<a test>", { "test" } },
 	XMLAttributeContentsParam{ "<a =\"test\" >", { "=\"test\"" } },
-	XMLAttributeContentsParam{ "<a \"test\">", { "\"test\"" } },
-	XMLAttributeContentsParam{ "", { "" } },
-	XMLAttributeContentsParam{ "", { "" } }
+	XMLAttributeContentsParam{ "<a \"test\">", { "\"test\"" } }
+	//XMLAttributeContentsParam{ "", { "" } },
+	//XMLAttributeContentsParam{ "", { "" } }
 	)
 	);
-	
-
-
-int main(int argc, char* argv[])
-{
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}

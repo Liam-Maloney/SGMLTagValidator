@@ -1,28 +1,41 @@
 #include "stdafx.h"
 #include "XMLTagValidator.h"
 
-std::string XMLTagValidator::valSingAttribute(std::string currentAttr)
+std::string XMLTagValidator::valSingAttribute(std::string currentAttr, int line, std::string tag)
 {
 	std::string result = "";
 
-	//finished here, need to add in more conditionals for all the possible errors in the source
-	if (currentAttr[0] == '=')
+	if (currentAttr == "")
 	{
-		result += "No name for tag: " + currentAttr + "\n";
+		return "";
 	}
-
-	
+	//finished here, need to add in more conditionals for all the possible errors in the source
+	if (currentAttr[0] == '=' || currentAttr[0] == '"')
+	{
+		if (currentAttr.length() == 1)
+		{
+			result += "No Name or Value on stray equals inside " + tag + " on line " + std::to_string(line) + "\n";
+		} 
+		else
+		{
+			result += "No name for tag: " + currentAttr + " inside " + tag + " on line " + std::to_string(line) + "\n";
+		}
+	}
+	else if (currentAttr[currentAttr.length() - 1] != '"')
+	{
+		result += "No value assigned to Name: " + currentAttr + " on line " + std::to_string(line) + "\n";
+	}
 
 	return result;
 }
 
-std::string XMLTagValidator::validateAttribute(std::list<std::string> attributes)
+std::string XMLTagValidator::validateAttribute(std::list<std::string> attributes, int line, std::string tag)
 {
 	std::string results = "";
 
 	for each (std::string currentAttr in attributes)
 	{
-		results += valSingAttribute(currentAttr);
+		results += valSingAttribute(currentAttr, line, tag);
 	}
 
 	return results;
@@ -31,10 +44,13 @@ std::string XMLTagValidator::validateAttribute(std::list<std::string> attributes
 std::list<std::string> XMLTagValidator::checkAttributes(std::list<Tag*> tagsToValidate)
 {
 	std::list<std::string> results;
-
+	int line = 0;
+	std::string tag = "";
 	for each(Tag* current in tagsToValidate)
 	{
-		results.emplace_back(validateAttribute(current->getAttributes()));
+		tag = current->getTagName();
+		line = current->getLineNumber();
+		results.emplace_back(validateAttribute(current->getAttributes(), line, tag));
 	}
 
 	return results;
