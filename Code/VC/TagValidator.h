@@ -1,12 +1,12 @@
 #pragma once
-#include <list>
+#include <vector>
 #include <string>
 #include "Tag.h"
 
 class TagValidator
 {
 public:
-	virtual std::list<std::string> validateTags(std::list<Tag*>) = 0;
+	virtual std::vector<std::string> validateTags(std::vector<Tag*>) = 0;
 	TagValidator();
 	~TagValidator();
 };

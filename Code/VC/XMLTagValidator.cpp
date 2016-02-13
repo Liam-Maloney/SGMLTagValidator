@@ -1,39 +1,18 @@
 #include "stdafx.h"
 #include "XMLTagValidator.h"
 
-std::string XMLTagValidator::valSingAttribute(std::string currentAttr, int line, std::string tag)
+std::string XMLTagValidator::valSingAttribute(Attribute currentAttr, int line, std::string tag)
 {
-	std::string result = "";
-
-	if (currentAttr == "")
-	{
-		return "";
-	}
-	//finished here, need to add in more conditionals for all the possible errors in the source
-	if (currentAttr[0] == '=' || currentAttr[0] == '"')
-	{
-		if (currentAttr.length() == 1)
-		{
-			result += "No Name or Value on stray equals inside " + tag + " on line " + std::to_string(line) + "\n";
-		} 
-		else
-		{
-			result += "No name for tag: " + currentAttr + " inside " + tag + " on line " + std::to_string(line) + "\n";
-		}
-	}
-	else if (currentAttr[currentAttr.length() - 1] != '"')
-	{
-		result += "No value assigned to Name: " + currentAttr + " on line " + std::to_string(line) + "\n";
-	}
+	std::string result;
 
 	return result;
 }
 
-std::string XMLTagValidator::validateAttribute(std::list<std::string> attributes, int line, std::string tag)
+std::string XMLTagValidator::validateAttribute(std::vector<Attribute> attributes, int line, std::string tag)
 {
 	std::string results = "";
 
-	for each (std::string currentAttr in attributes)
+	for each (Attribute currentAttr in attributes)
 	{
 		results += valSingAttribute(currentAttr, line, tag);
 	}
@@ -41,40 +20,48 @@ std::string XMLTagValidator::validateAttribute(std::list<std::string> attributes
 	return results;
 }
 
-std::list<std::string> XMLTagValidator::checkAttributes(std::list<Tag*> tagsToValidate)
+std::vector<std::string> XMLTagValidator::checkAttributes(std::vector<Tag*> tagsToValidate)
 {
-	std::list<std::string> results;
+	std::vector<std::string> results;
 	int line = 0;
 	std::string tag = "";
 	for each(Tag* current in tagsToValidate)
 	{
-		tag = current->getTagName();
-		line = current->getLineNumber();
-		results.emplace_back(validateAttribute(current->getAttributes(), line, tag));
+		if (current->isClosing() && !current->getAttributes().empty())
+		{
+			results.emplace_back("Closing attribute " + current->getTagName() + " on line " + std::to_string(current->getLineNumber()) + " should not have attributes (Attributes not allowed in XML closing tags)");
+		}
+		else
+		{
+			tag = current->getTagName();
+			line = current->getLineNumber();
+			std::string result = validateAttribute(current->getAttributes(), line, tag);
+			if (result.size() != 0)
+			{
+				results.emplace_back(result);
+			}
+		}
 	}
 
 	return results;
 }
 
-std::list<std::string> XMLTagValidator::validateTags(std::list<Tag*> tagsToValidate)
+std::vector<std::string> XMLTagValidator::validateTags(std::vector<Tag*> tagsToValidate)
 {
-	//TODO: Element names cannot start with the letters xml (or XML, or Xml, etc)
-	//TODO: XML TAGS MUST START WITH AN _ OR A LETTER
-	//TODO: POSSIBLY RETURN THIS TO A VIEW LAYER FROM THE CONTROLLER IN LIST FORMAT
-	std::list<std::string> results;
+	std::vector<std::string> results;
 	results.emplace_back("Tag open/close Validation Results: \n\n");
-	std::list<std::string> tagResults = checkTagPairs(tagsToValidate);
-	results.splice(results.end(), tagResults);
+	std::vector<std::string> tagResults = checkTagPairs(tagsToValidate);
+	results.insert(results.end(), tagResults.begin(), tagResults.end());
 	results.emplace_back("\n\nValidation of tag attributes: \n\n");
-	std::list<std::string> attributeResults = checkAttributes(tagsToValidate);
-	results.splice(results.end(), attributeResults);
+	std::vector<std::string> attributeResults = checkAttributes(tagsToValidate);
+	results.insert(results.end(), attributeResults.begin(), attributeResults.end());
 	return results;
 }
 
-std::list<std::string> XMLTagValidator::checkTagPairs(std::list<Tag*> tagsToCheck)
+std::vector<std::string> XMLTagValidator::checkTagPairs(std::vector<Tag*> tagsToCheck)
 {
 	std::stack<Tag*> bracketPairs;
-	std::list<std::string> results;
+	std::vector<std::string> results;
 	for each (Tag* current in tagsToCheck)
 	{
 		if (current->isClosing())

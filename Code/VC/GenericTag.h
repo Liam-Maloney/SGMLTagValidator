@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
-#include <list>
+#include <vector>
+#include "Attribute.h"
+#include <vector>
 
 class GenericTag
 {
@@ -12,7 +14,7 @@ public:
 protected:
 
 	std::string tagName;
-	std::list<std::string> attributes;
+	std::vector<Attribute> attributes;
 	int lineNumber = 0;
 };
 

@@ -22,7 +22,7 @@ bool XMLTag::requiresClosing()
 	return reqClosing;
 }
 
-void XMLTag::setAttributes(std::list<std::string> attributes)
+void XMLTag::setAttributes(std::vector<Attribute> attributes)
 {
 	this->attributes = attributes;
 }
@@ -37,7 +37,7 @@ void XMLTag::setLineNumber(int lineNumber)
 	this->lineNumber = lineNumber;
 }
 
-std::list<std::string> XMLTag::getAttributes()
+std::vector<Attribute> XMLTag::getAttributes()
 {
 	return attributes;
 }

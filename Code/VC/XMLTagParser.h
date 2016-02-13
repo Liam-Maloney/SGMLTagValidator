@@ -1,47 +1,73 @@
 #pragma once
 #include "TagParser.h"
 #include <string>
-#include <list>
+#include <vector>
 #include <queue>
 #include <fstream>
 #include "TagFactory.h"
 #include "IOFactory.h"
-
+#include <functional>
+#include <queue>
+#include <vector>
 
 class XMLTagParser : public TagParser 
 {
-public:struct simpleTag;
-private:
-
 	TagFactory tagSupplier;
 	IOFactory ioHandle;
-	
-	struct queueEntry
+
+	struct tokenLineNumPairs
 	{
-		int index;
-		char symbol;
+		std::string token;
+		int lineNumber;
 	};
 
-	bool isValidSymbol(char current);
-	std::list<std::string> finallyGetAttributes(std::string processedAttr);
-	std::string removeSpacesAroundEquals(std::string tagWithRemovedSpaces);
-	std::string removeExtraSpaces(std::string currentTag);
-	std::list<Tag*> parseFromSource(std::string source);
-	void openFileHandleFor(std::string fileToParseFrom);
-	std::list<Tag*> formTagsAsObjects(std::list<XMLTagParser::simpleTag> fullTags);
-	bool notAtEndOfName(char endOfTagDelimiter);
-	std::list<std::string> readTagAttributes(std::string currentTag);
-	std::string readTagFullName(std::string fullTag);
-	Tag* getNewTagWithAttributesSet(std::string tagName, std::list<std::string> attributes, int lineNumber);
-	std::queue<queueEntry> getOrder(std::string source);
-	std::list<XMLTagParser::simpleTag> tokenizeTags(std::string source);
-	XMLTagParser::queueEntry XMLTagParser::getNextQuoteFrom(std::queue<queueEntry>* orderedSyntax);
+	std::vector<tokenLineNumPairs> readTokenizedTags(std::string inSource);
+	
+	std::vector<tokenLineNumPairs> tokenizeAccoringTo(
+		std::vector<int> sortedDelimitersOfTokens,
+		std::string inSource);
+	
+	std::vector<int> getSortedDelimitersForTokens(std::string inSource);
+
+	std::vector<Tag*> formTagsAsObjects(std::vector<tokenLineNumPairs>);
+
+	std::priority_queue<int, std::vector<int>, std::greater<int>>
+		sort(std::vector<int> openingTags, std::vector<int> closingTags);
+
+	std::vector<int> findLocationsOf(char whatImLookingFor, std::string insideThis);
+
+	void placeCollectionIntoSortedContainer(
+		std::priority_queue<int, std::vector<int>, std::greater<int>>* goingToContainer,
+		std::vector<int> goingFromContainer);
+
+	void removeDelimitersBetweenQuotesIn(std::vector<int> *sortedDelimitersOfTokens,
+		std::string inSource);
+
+	void removeSortedDelimitersBetweenIndexOf(int lowerQuote, int upperQuote,
+		std::vector<int> *sortedDelimitersOfTokens);
+
+	Tag* getTagAsObject(tokenLineNumPairs token);
+
+	void progressToCloseTagSymbol(std::vector<int>* sortedDelimitersOfTokens, std::string inSource);
+
+	void progressToOpenTagSymbol(std::vector<int>* sortedDelimitersOfTokens, std::string inSource);
+
+	int updateLineNumber(std::vector<int>* lineNumberIndexes, std::vector<int>* sortedDelimitersOfTokens);
+
+	tokenLineNumPairs formTokenLineNumPair(int from, int to, int line, std::string inSource);
+
+	bool findOutIfNeedsClosingTag(std::string token);
+
+	bool findOutIfItIsAClosingTag(std::string token);
+
+	std::string findOutTagName(std::string token);
+
 public:
 	
-	std::list<Tag*> getTagsAsListParsedFrom(IO* inputSource);
-	std::list<Tag*> parseTagsFrom(std::string fileToParseFrom);
+	std::vector<Tag*> getTagsAsVectorParsedFrom(std::string source);
+	std::vector<Tag*> parseTagsFrom(std::string fileToParseFrom);
 	
 	XMLTagParser();
-	XMLTagParser(std::string testForNow);
+	XMLTagParser(std::string);
 	~XMLTagParser();
 };

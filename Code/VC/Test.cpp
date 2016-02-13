@@ -35,7 +35,7 @@ TEST_P(XMLTagParserTest, CountOfTagsParsed)
 {
 	SimulatedIO simulatedInputSupplier(parameters.simulatedInput);
 	simulatedInputHandle = &simulatedInputSupplier;
-	std::list<Tag*> testResults = ioParseTestInstance->getTagsAsListParsedFrom(simulatedInputHandle);
+	std::vector<Tag*> testResults = ioParseTestInstance->getTagsAsVectorParsedFrom(simulatedInputHandle->getContent());
 	ASSERT_EQ(testResults.size(), parameters.expectedNumOfTags) << "\nTest Failed on: " << parameters.simulatedInput;
 }
 
@@ -44,6 +44,7 @@ INSTANTIATE_TEST_CASE_P(default, XMLTagParserTest,
 	testing::Values(
 	//Parameterised Tests take form:
 	//	{"input", expected num of tags parsed from that input}
+	XMLTagCountParams{ "<author   this=>", 1 },
 	XMLTagCountParams{"<this is=\"a\" test></this of=\"correctness\">", 2},
 	XMLTagCountParams{ "<s></s t=\"a\">", 2 },
 	XMLTagCountParams{"<this is=\"atest\">", 1 },
@@ -100,7 +101,7 @@ TEST_P(SingleParseTagContents, ContentsWhenOneTagParsed)
 {
 	SimulatedIO simulatedInputSupplier(parameters.simulatedInput);
 	simulatedInputHandle = &simulatedInputSupplier;
-	std::list<Tag*> testResults = ioParseTestInstance->getTagsAsListParsedFrom(simulatedInputHandle);
+	std::vector<Tag*> testResults = ioParseTestInstance->getTagsAsVectorParsedFrom(simulatedInputHandle->getContent());
 	
 	int i = 0;
 	std::string expected;
@@ -123,6 +124,7 @@ INSTANTIATE_TEST_CASE_P(default, SingleParseTagContents,
 	testing::Values(
 	//Parameterised Tests take form:
 	//	{"input", {"tagname", "tagname", "tagname"}}
+	XMLSingleParseContentsParam{ "<author   this=>", {"author"} },
 	XMLSingleParseContentsParam{ "<test></test>", {"test", "test"} },
 	XMLSingleParseContentsParam{ ">a <b <>", {">", "b", ""} },
 	XMLSingleParseContentsParam{ "<name s=\">\">", {"name"} },
@@ -175,7 +177,7 @@ TEST_P(ContentsOfAttributes, ContentsOfAttributes)
 {
 	SimulatedIO simulatedInputSupplier(parameters.simulatedInput);
 	simulatedInputHandle = &simulatedInputSupplier;
-	std::list<Tag*> testResults = ioParseTestInstance->getTagsAsListParsedFrom(simulatedInputHandle);
+	std::vector<Tag*> testResults = ioParseTestInstance->getTagsAsVectorParsedFrom(simulatedInputHandle->getContent());
 
 	if (testResults.empty())
 	{
@@ -183,7 +185,7 @@ TEST_P(ContentsOfAttributes, ContentsOfAttributes)
 	}
 
 	int i = 0;
-	std::list<std::string> attrResults;
+	std::vector<Attribute> attrResults;
 	std::string expected;
 	std::string actual;
 	for each (Tag* currentTag in testResults)
@@ -192,13 +194,14 @@ TEST_P(ContentsOfAttributes, ContentsOfAttributes)
 		if (attrResults.empty())
 		{
 			i++;
+			
 		}
 		else
 		{
-			for each (std::string currentAttribute in attrResults)
+			for each (Attribute currentAttribute in attrResults)
 			{
 				expected = parameters.expectedAttrContents[i];
-				actual = currentAttribute;
+				actual = currentAttribute.name;
 				if (expected != actual)
 				{
 					ASSERT_EQ(expected, actual) << "\nTest Failed on: " << parameters.simulatedInput << " at attribute " << i << ": " << expected;
@@ -216,6 +219,7 @@ INSTANTIATE_TEST_CASE_P(default, ContentsOfAttributes,
 	//Parameterised Tests take form:
 	//	{"input", {"tagname", "tagname", "tagname"}}
 	//XMLAttributeContentsParam{ "", { "" } },
+	XMLAttributeContentsParam{ "<author   this=>", { "this=" } },
 	XMLAttributeContentsParam{ "<name type=\"text>Liam</name>", { "type=\"text>Liam</name>" } },
 	XMLAttributeContentsParam{ "<person test test2= \"works\" =\"tesmt\"  >", { "test", "test2=\"works\"", "=\"tesmt\"" } },
 	XMLAttributeContentsParam{ "<this is=\"a\" test></this of=\"correctness\">", { "is=\"a\"", "test", "of=\"correctness\"" } },

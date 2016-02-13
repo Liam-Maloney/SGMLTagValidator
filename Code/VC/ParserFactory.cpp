@@ -11,7 +11,6 @@ TagParser* ParserFactory::createParserFor(std::string fileType)
 	{
 		return NULL;
 	}
-	//return parserHandle;
 }
 
 ParserFactory::~ParserFactory()
