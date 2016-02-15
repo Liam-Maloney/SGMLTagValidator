@@ -11,8 +11,6 @@ std::vector<Tag*> XMLTagParser::getTagsAsVectorParsedFrom(std::string source)
 {
 	Lexer tokenizer;
 	std::vector<Lexer::tokenLineNumPairs> tokenizedTags = tokenizer.readTokenizedTagsFrom(source);
-
-	//anyting underthis is the parser
 	std::vector<Tag*> parsedTags = formTagsAsObjects(tokenizedTags);
 	return parsedTags;
 }

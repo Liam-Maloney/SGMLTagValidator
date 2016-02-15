@@ -9,8 +9,26 @@ std::vector<int> Utility::findLocationsOf(char whatImLookingFor, std::string ins
 
 	while (searcherLocation != NO_MORE_LEFT)
 	{
-		locations.push_back(searcherLocation);
-		searcherLocation = insideThis.find_first_of(whatImLookingFor, searcherLocation + 1);
+		if (whatImLookingFor == '>')
+		{
+			if (searcherLocation > 2)
+			{
+				if (!(insideThis[searcherLocation] == '>' && insideThis[searcherLocation - 1] == '-' && insideThis[searcherLocation - 2] == '-'))
+				{
+					locations.push_back(searcherLocation);
+					searcherLocation = insideThis.find_first_of(whatImLookingFor, searcherLocation + 1);
+				}
+				else
+				{
+					searcherLocation = insideThis.find_first_of(whatImLookingFor, searcherLocation + 1);
+				}
+			}
+		}
+		else
+		{
+			locations.push_back(searcherLocation);
+			searcherLocation = insideThis.find_first_of(whatImLookingFor, searcherLocation + 1);
+		}
 	}
 	return locations;
 }
