@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 	//::testing::InitGoogleTest(&argc, argv);
 	clear();
 	int option = 0;
-	while (option != 2)
+	while (true)
 	{
 		std::cout << "Welcome to the XML/HTML Validator! \n" << std::endl;
 		std::cout << std::endl;
@@ -57,7 +57,8 @@ int main(int argc, char* argv[])
 		std::cout << "\t\t2. Exit" << std::endl;
 		std::cout << std::endl;
 		std::cout << std::endl;
-		std::cout << "Your Choice: "; std::cin >> option;
+		std::cout << "Your Choice: "; 
+		std::cin >> option;
 
 		switch (option)
 		{
@@ -99,7 +100,6 @@ int main(int argc, char* argv[])
 				break;
 			}
 		}
-		option = -1;
 	}
 	//return RUN_ALL_TESTS();
 	return 0;

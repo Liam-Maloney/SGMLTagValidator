@@ -1,11 +1,6 @@
 #include "stdafx.h"
 #include "XMLTagParser.h"
 
-XMLTagParser::XMLTagParser()
-{
-
-}
-
 std::vector<Tag*> XMLTagParser::parseTagsFrom(std::string fileToParseFrom)
 {
 	IO* source = ioHandle.getGenericIoHandle(fileToParseFrom);
@@ -14,172 +9,18 @@ std::vector<Tag*> XMLTagParser::parseTagsFrom(std::string fileToParseFrom)
 
 std::vector<Tag*> XMLTagParser::getTagsAsVectorParsedFrom(std::string source)
 {
-	std::vector<tokenLineNumPairs> tokenizedTags = readTokenizedTags(source);
+	Lexer tokenizer;
+	std::vector<Lexer::tokenLineNumPairs> tokenizedTags = tokenizer.readTokenizedTagsFrom(source);
+
+	//anyting underthis is the parser
 	std::vector<Tag*> parsedTags = formTagsAsObjects(tokenizedTags);
 	return parsedTags;
 }
 
-std::vector<XMLTagParser::tokenLineNumPairs> XMLTagParser::readTokenizedTags(std::string inSource)
-{
-	std::vector<int> sortedDelimitersOfTokens = getSortedDelimitersForTokens(inSource);
-	removeDelimitersBetweenQuotesIn(&sortedDelimitersOfTokens, inSource);
-	std::vector<tokenLineNumPairs> tokens = tokenizeAccoringTo(sortedDelimitersOfTokens, inSource);
-	return tokens;
-}
-
-std::vector<int> XMLTagParser::getSortedDelimitersForTokens(
-	std::string inSource)
-{
-	std::vector<int> locationsOfOpenTag = findLocationsOf('<', inSource);
-	std::vector<int> locationsOfClosingTag = findLocationsOf('>', inSource);
-	std::vector<int> sortedDelimiters = locationsOfClosingTag;
-	sortedDelimiters.insert(sortedDelimiters.begin(), locationsOfOpenTag.begin(),
-		locationsOfOpenTag.end());
-	std::sort(sortedDelimiters.begin(), sortedDelimiters.end());
-	return sortedDelimiters;
-}
-
-void XMLTagParser::removeDelimitersBetweenQuotesIn(std::vector<int> *sortedDelimitersOfTokens,
-	std::string inSource)
-{
-	int upperQuote;
-	int lowerQuote;
-
-	std::vector<int> locationsToRemoveDelimitersBetween = findLocationsOf('"', inSource);
-	while (!locationsToRemoveDelimitersBetween.empty())
-	{
-		upperQuote = locationsToRemoveDelimitersBetween.back();
-		locationsToRemoveDelimitersBetween.pop_back();
-		if (!locationsToRemoveDelimitersBetween.empty())
-		{
-			lowerQuote = locationsToRemoveDelimitersBetween.back();
-			locationsToRemoveDelimitersBetween.pop_back();
-		}
-		if ((lowerQuote == (upperQuote - 1)) && (lowerQuote == 0))
-		{
-			return;
-		}
-		else
-		{
-			removeSortedDelimitersBetweenIndexOf(
-				lowerQuote, upperQuote, sortedDelimitersOfTokens);
-		}
-	}
-}
-
-std::vector<XMLTagParser::tokenLineNumPairs> XMLTagParser::tokenizeAccoringTo(
-	std::vector<int> sortedDelimitersOfTokens,
-	std::string inSource)
-{
-	std::vector<tokenLineNumPairs> tokenBuildup;
-	int atStartIndex = 0;
-	int upToThisPoint = -1;
-
-	std::vector<int> lineNumberIndexes = findLocationsOf('\n', inSource);
-	int lineNum = 1;
-
-	while (!sortedDelimitersOfTokens.empty())
-	{
-		progressToOpenTagSymbol(&sortedDelimitersOfTokens, inSource);
-		atStartIndex = sortedDelimitersOfTokens.front();
-		sortedDelimitersOfTokens.erase(sortedDelimitersOfTokens.begin());
-		lineNum += updateLineNumber(&lineNumberIndexes, &sortedDelimitersOfTokens);
-		progressToCloseTagSymbol(&sortedDelimitersOfTokens, inSource);
-		upToThisPoint = sortedDelimitersOfTokens.front();
-		sortedDelimitersOfTokens.erase(sortedDelimitersOfTokens.begin());
-		tokenLineNumPairs newTokenLineNumPair = formTokenLineNumPair(atStartIndex,
-			upToThisPoint, lineNum, inSource);
-		tokenBuildup.emplace_back(newTokenLineNumPair);
-	}
-	return tokenBuildup;
-}
-
-std::vector<int> XMLTagParser::findLocationsOf(char whatImLookingFor, std::string insideThis)
-{
-	const int NO_MORE_LEFT = -1;
-	std::vector<int> locations;
-	int searcherLocation = insideThis.find_first_of(whatImLookingFor);
-
-	while (searcherLocation != NO_MORE_LEFT)
-	{
-		locations.push_back(searcherLocation);
-		searcherLocation = insideThis.find_first_of(whatImLookingFor, searcherLocation + 1);
-	}
-	return locations;
-}
-
-void XMLTagParser::removeSortedDelimitersBetweenIndexOf(int lowerQuote, int upperQuote,
-	std::vector<int>* sortedDelimitersOfTokens)
-{
-	//reverse iteration as this does not invalidate vector container
-	std::vector<int>::iterator i = sortedDelimitersOfTokens->end();
-	i--;
-	for (; i != sortedDelimitersOfTokens->begin(); i--)
-	{
-		if (*i > lowerQuote && *i < upperQuote)
-		{
-			//erase returns non-invalidated iterator
-			i = sortedDelimitersOfTokens->erase(i);
-		}
-		else if (*i < lowerQuote)
-		{
-			return;
-		}
-	}
-
-	//final loop
-	if (*i > lowerQuote && *i < upperQuote)
-	{
-		//erase returns non-invalidated iterator
-		i = sortedDelimitersOfTokens->erase(i);
-	}
-	else if (*i < lowerQuote)
-	{
-		return;
-	}
-}
-
-void XMLTagParser::progressToOpenTagSymbol(std::vector<int>* sortedDelimitersOfTokens, std::string inSource)
-{
-	while (inSource[sortedDelimitersOfTokens->front()] != '<' && !sortedDelimitersOfTokens->empty())
-	{
-		//pop_front hack!
-		sortedDelimitersOfTokens->erase(sortedDelimitersOfTokens->begin());
-	}
-}
-
-void XMLTagParser::progressToCloseTagSymbol(std::vector<int>* sortedDelimitersOfTokens, std::string inSource)
-{
-	while ((inSource[sortedDelimitersOfTokens->front()] != '>' && inSource[sortedDelimitersOfTokens->front()] != '<') 
-		&& !sortedDelimitersOfTokens->empty())
-	{
-		sortedDelimitersOfTokens->erase(sortedDelimitersOfTokens->begin());
-	}
-}
-
-int XMLTagParser::updateLineNumber(std::vector<int>* lineNumberIndexes, std::vector<int>* sortedDelimitersOfTokens)
-{
-	int progressedByThisManyLineNums = 0;
-	while (!lineNumberIndexes->empty() && lineNumberIndexes->front() < sortedDelimitersOfTokens->front())
-	{
-		lineNumberIndexes->erase(lineNumberIndexes->begin());
-		progressedByThisManyLineNums++;
-	}
-	return progressedByThisManyLineNums;
-}
-
-XMLTagParser::tokenLineNumPairs XMLTagParser::formTokenLineNumPair(int from, int to, int line, std::string inSource)
-{
-	tokenLineNumPairs newTokenLineNumPair;
-	newTokenLineNumPair.token = inSource.substr(from, (to + 1) - from);
-	newTokenLineNumPair.lineNumber = line;
-	return newTokenLineNumPair;
-}
-
-std::vector<Tag*> XMLTagParser::formTagsAsObjects(std::vector<XMLTagParser::tokenLineNumPairs> tokensToTurnInToTags)
+std::vector<Tag*> XMLTagParser::formTagsAsObjects(std::vector<Lexer::tokenLineNumPairs> tokensToTurnInToTags)
 {
 	std::vector<Tag*> tagObjects;
-	for each (tokenLineNumPairs token in tokensToTurnInToTags)
+	for each (Lexer::tokenLineNumPairs token in tokensToTurnInToTags)
 	{
 		tagObjects.emplace_back(getTagAsObject(token));
 	}
@@ -311,7 +152,7 @@ Attribute XMLTagParser::constructAttribute(std::string singleAattributeAsString)
 
 int XMLTagParser::getEndIndexOfAttribute(std::string isolatedAttributes)
 {
-	std::vector<int> ignoreSpacesBetween = findLocationsOf('"', isolatedAttributes);
+	std::vector<int> ignoreSpacesBetween = Utility::findLocationsOf('"', isolatedAttributes);
 	int endOfNextAttribute;
 	if (ignoreSpacesBetween.size() <= 1)
 	{
@@ -379,7 +220,7 @@ std::vector<std::string> XMLTagParser::getAllSubstringsBetweenSpaces(
 	return substrings;
 }
 
-std::vector<std::string> removeRedundantEntries(std::vector<std::string> substrings)
+std::vector<std::string> XMLTagParser::removeRedundantEntries(std::vector<std::string> substrings)
 {
 	std::vector<std::string> isolatedAttributesAsVector;
 	for each (std::string current in substrings)
@@ -408,7 +249,7 @@ std::vector<int> XMLTagParser::getIndexOfEqualsInVector(std::vector<std::string>
 	return locationsOfEquals;
 }
 
-bool notAlreadyPartOfAttribute(int index, std::vector<std::string> substrings)
+bool XMLTagParser::notAlreadyPartOfAttribute(int index, std::vector<std::string> substrings)
 {
 	if (substrings[index].find_first_of('=') == -1)
 	{
@@ -427,7 +268,7 @@ bool notAlreadyPartOfAttribute(int index, std::vector<std::string> substrings)
 	}
 }
 
-bool rightOfThisIsValue(int index, std::vector<std::string> substrings)
+bool XMLTagParser::rightOfThisIsValue(int index, std::vector<std::string> substrings)
 {
 	if (substrings.size() == 1 || 0)
 	{
@@ -447,7 +288,7 @@ bool rightOfThisIsValue(int index, std::vector<std::string> substrings)
 	}
 }
 
-bool leftOfThisIsName(int index, std::vector<std::string> substrings)
+bool XMLTagParser::leftOfThisIsName(int index, std::vector<std::string> substrings)
 {
 	if (substrings.size() == 0)
 	{
@@ -467,7 +308,7 @@ bool leftOfThisIsName(int index, std::vector<std::string> substrings)
 	}
 }
 
-void concatRightValueToThisEquals(int indexOfEqualsToConcatTo, std::vector<std::string>* substrings)
+void XMLTagParser::concatRightValueToThisEquals(int indexOfEqualsToConcatTo, std::vector<std::string>* substrings)
 {
 	std::vector<std::string>::iterator concatAndEraseThis = substrings->begin();
 	for (int i = 0; i < indexOfEqualsToConcatTo; i++)
@@ -482,7 +323,7 @@ void concatRightValueToThisEquals(int indexOfEqualsToConcatTo, std::vector<std::
 	substrings->erase(concatAndEraseThis);
 }
 
-void concatLeftNameToThisEquals(int indexOfEqualsToConcatTo, std::vector<std::string>* substrings)
+void XMLTagParser::concatLeftNameToThisEquals(int indexOfEqualsToConcatTo, std::vector<std::string>* substrings)
 {
 	std::vector<std::string>::iterator concatAndEraseThis = substrings->begin();
 	for (int i = 0; i < indexOfEqualsToConcatTo; i++)
@@ -540,7 +381,7 @@ std::vector<std::string> XMLTagParser::removeSpaceAroundNameValuePairs(
 
 std::vector<std::string> XMLTagParser::removeRepeatedSpacesIn(std::string* isolatedAttributes)
 {
-	std::vector<int> indexOfSpaces = findLocationsOf(' ', *isolatedAttributes);
+	std::vector<int> indexOfSpaces = Utility::findLocationsOf(' ', *isolatedAttributes);
 	std::vector<std::string> substrings;
 	if (indexOfSpaces.empty())
 	{
@@ -548,7 +389,7 @@ std::vector<std::string> XMLTagParser::removeRepeatedSpacesIn(std::string* isola
 	}
 	else
 	{
-		removeDelimitersBetweenQuotesIn(&indexOfSpaces, *isolatedAttributes);
+		Utility::removeDelimitersBetweenQuotesIn(&indexOfSpaces, *isolatedAttributes);
 		substrings = getAllSubstringsBetweenSpaces(
 			&indexOfSpaces, isolatedAttributes);
 		substrings = removeRedundantEntries(substrings);
@@ -611,7 +452,7 @@ std::vector<Attribute> XMLTagParser::findOutAttributesFrom(std::string tokenToRe
 	return parsedAttributes;
 }
 
-Tag* XMLTagParser::getTagAsObject(XMLTagParser::tokenLineNumPairs token)
+Tag* XMLTagParser::getTagAsObject(Lexer::tokenLineNumPairs token)
 {
 	Tag* newTag = tagSupplier.getTagFor("xml");
 	newTag->updateRequiresClosing(findOutIfNeedsClosingTag(token.token));
