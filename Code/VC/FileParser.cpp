@@ -6,7 +6,8 @@ FileParser::FileParser(std::string fileToParseFrom)
 	fileHandle.open(fileToParseFrom);
 	if (!(fileHandle.is_open()))
 	{
-		throw std::runtime_error("Error Opening File Stream to " + fileToParseFrom + "\n");
+		throw std::runtime_error("Error Opening File Stream to " + 
+			fileToParseFrom + ".  Are you sure the file exists?\n\n");
 	}
 }
 

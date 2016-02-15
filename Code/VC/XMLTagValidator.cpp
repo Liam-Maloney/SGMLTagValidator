@@ -3,8 +3,38 @@
 
 std::string XMLTagValidator::valSingAttribute(Attribute currentAttr, int line, std::string tag)
 {
-	std::string result;
+	std::string result = "";
 
+	if (currentAttr.hasEquals)
+	{
+		if (!currentAttr.hasName)
+		{
+			if (currentAttr.hasValue)
+			{
+				result += "Tag <" + tag + ">, line " + std::to_string(line) + ", no Name for =" + currentAttr.value + "\n";
+			}
+			else
+			{
+				result += "Tag <" + tag + ">, line " + std::to_string(line) + ", has a stray ='s\n";
+			}
+		}
+		else if (!currentAttr.hasValue)
+		{
+			result += "Tag <" + tag + ">, line " + std::to_string(line) + " has no value for " + currentAttr.name + "\n";
+		}
+	}
+	else
+	{
+		if (currentAttr.hasName)
+		{
+			result += "Attribute in tag <" + tag + "> on line " + std::to_string(line) + " has no value for " + currentAttr.name + "\n";
+		}
+		else if (currentAttr.hasValue)
+		{
+			result += "Attribute in tag <" + tag + "> on line " + std::to_string(line) + " has no name or equals for " + currentAttr.value + "\n";
+		}
+	}
+	
 	return result;
 }
 
@@ -23,18 +53,18 @@ std::string XMLTagValidator::validateAttribute(std::vector<Attribute> attributes
 std::vector<std::string> XMLTagValidator::checkAttributes(std::vector<Tag*> tagsToValidate)
 {
 	std::vector<std::string> results;
-	int line = 0;
-	std::string tag = "";
 	for each(Tag* current in tagsToValidate)
 	{
 		if (current->isClosing() && !current->getAttributes().empty())
 		{
-			results.emplace_back("Closing attribute " + current->getTagName() + " on line " + std::to_string(current->getLineNumber()) + " should not have attributes (Attributes not allowed in XML closing tags)");
+			results.emplace_back("Closing attribute " + current->getTagName() + 
+				" on line " + std::to_string(current->getLineNumber()) + 
+				" should not have attributes (Attributes not allowed in XML closing tags)");
 		}
 		else
 		{
-			tag = current->getTagName();
-			line = current->getLineNumber();
+			std::string tag = current->getTagName();
+			int line = current->getLineNumber();
 			std::string result = validateAttribute(current->getAttributes(), line, tag);
 			if (result.size() != 0)
 			{
@@ -66,15 +96,12 @@ std::vector<std::string> XMLTagValidator::checkTagPairs(std::vector<Tag*> tagsTo
 	{
 		if (current->isClosing())
 		{
-
 			if (bracketPairs.top()->getTagName() != current->getTagName())
 			{
-				//TODO: ADD IN A METHOD TO HANDLE THE ERROR REPORTING
 				results.emplace_back("Error line " + std::to_string(bracketPairs.top()->getLineNumber()) + ", no closing tag for <" + bracketPairs.top()->getTagName() + ">\n");
 				results.emplace_back("Error line " + std::to_string(current->getLineNumber()) + ", no opening tag for <" + current->getTagName() + ">, expected closing tag for <" + bracketPairs.top()->getTagName() + ">\n");
 			}
 			bracketPairs.pop();
-
 		}
 		else
 		{
@@ -88,6 +115,7 @@ std::vector<std::string> XMLTagValidator::checkTagPairs(std::vector<Tag*> tagsTo
 			}
 		}
 	}
+
 	return results;
 }
 
