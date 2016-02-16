@@ -40,3 +40,12 @@ std::vector<Tag*> XMLTagParser::formTagsAsObjects(std::vector<Lexer::tokenLineNu
 	}
 	return tagObjects;
 }
+
+XMLTagParser::XMLTagParser()
+{
+
+}
+XMLTagParser::~XMLTagParser()
+{
+
+}

@@ -3,34 +3,54 @@
 
 HTMLTagParser::HTMLTagParser()
 {
-	//voidTags["AREA"] = true;
-	
-	
-	/*voidTags.emplace_back("BASE", true);
-	voidTags.emplace_back("BR", true);
-	voidTags.emplace_back("COL", true);
-	voidTags.emplace_back("COMMAND", true);
-	voidTags.emplace_back("EMBED", true);
-	voidTags.emplace_back("HR", true);
-	voidTags.emplace_back("IMG", true);
-	voidTags.emplace_back("INPUT", true);
-	voidTags.emplace_back("KEYGEN", true);
-	voidTags.emplace_back("LINK", true);
-	voidTags.emplace_back("META", true);
-	voidTags.emplace_back("PARAM", true);
-	voidTags.emplace_back("SOURCE", true);
-	voidTags.emplace_back("TRACK", true);
-	voidTags.emplace_back("WBR", true);*/
+	voidTags["AREA"] = true;
+	voidTags["BASE"] = true;
+	voidTags["BR"] = true;
+	voidTags["COL"] = true;
+	voidTags["COMMAND"] = true;
+	voidTags["EMBED"] = true;
+	voidTags["HR"] = true;
+	voidTags["IMG"] = true;
+	voidTags["INPUT"] = true;
+	voidTags["KEYGEN"] = true;
+	voidTags["LINK"] = true;
+	voidTags["META"] = true;
+	voidTags["PARAM"] = true;
+	voidTags["SOURCE"] = true;
+	voidTags["TRACK"] = true;
+	voidTags["WBR"] = true;
 }
 
-/*
+HTMLTagParser::~HTMLTagParser()
+{
+
+}
+
+std::vector<Tag*> HTMLTagParser::formTagsAsObjects(std::vector<Lexer::tokenLineNumPairs> tokensToTurnInToTags)
+{
+	std::vector<Tag*> tagObjects;
+	for each (Lexer::tokenLineNumPairs token in tokensToTurnInToTags)
+	{
+		tagObjects.emplace_back(getTagAsObject(token));
+	}
+	return tagObjects;
+}
+
 bool HTMLTagParser::findOutIfNeedsClosingTag(std::string token)
 {
-	bool isSelfClosing = (token[token.length() - 2] == '/') ? false : true;
-	//const bool is_in = voidTags[token];
-	return false;
+	bool isClosingTag = (token[token.length() - 2] == '/') ? true : false;
+	std::string tagname = findOutTagName(token);
+	std::transform(tagname.begin(), tagname.end(), tagname.begin(), toupper);
+	bool isVoidTag = voidTags[tagname];
+	if (isClosingTag || isVoidTag)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
-*/
 
 std::vector<Tag*> HTMLTagParser::parseTagsFrom(std::string fileToParseFrom)
 {

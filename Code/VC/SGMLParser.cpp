@@ -1,6 +1,16 @@
 #include "stdafx.h"
 #include "SGMLParser.h"
 
+SGMLParser::SGMLParser()
+{
+
+}
+
+SGMLParser::~SGMLParser()
+{
+
+}
+
 bool SGMLParser::findOutIfItIsAClosingTag(std::string token)
 {
 	return (token[1] == '/') ? true : false;

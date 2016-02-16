@@ -13,7 +13,9 @@ std::string WebValidator::fileExtensionTypeOf(std::string fileToValidate)
 	std::string extension = fileToValidate.substr(++indexOfBeginningOfFileExtention,
 		fileToValidate.length() - indexOfBeginningOfFileExtention);
 
-	if (extension == "xml" || extension == "html")
+	std::transform(extension.begin(), extension.end(), extension.begin(), toupper);
+
+	if (extension == "XML" || extension == "HTML")
 	{
 		return extension;
 	}

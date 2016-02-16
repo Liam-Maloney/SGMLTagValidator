@@ -7,7 +7,6 @@
 #include "Tag.h"
 #include "TagFactory.h"
 #include "IOFactory.h"
-#include "TagParserInterface.h"
 
 class SGMLParser
 {
@@ -19,7 +18,7 @@ protected:
 
 	bool leftOfThisIsName(int index, std::vector<std::string> substrings);
 	std::vector<std::string> removeRedundantEntries(std::vector<std::string> substrings);
-	bool notAlreadyPartOfAttribute(int index, std::vector<std::string> substrings);
+	bool notAlreadyPartOfAttribute(int indeax, std::vector<std::string> substrings);
 	bool rightOfThisIsValue(int index, std::vector<std::string> substrings);
 	void concatRightValueToThisEquals(int indexOfEqualsToConcatTo, std::vector<std::string>* substrings);
 	void concatLeftNameToThisEquals(int indexOfEqualsToConcatTo, std::vector<std::string>* substrings);
@@ -44,6 +43,8 @@ protected:
 	std::vector<int> getIndexOfEqualsInVector(std::vector<std::string>* substrings);
 
 public:
+	SGMLParser();
+	virtual ~SGMLParser();
 
 };
 

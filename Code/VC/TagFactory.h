@@ -10,7 +10,7 @@ class TagFactory
 {
 	Tag* tagHandle;
 public:
-	~TagFactory();
+	//~TagFactory();
 	Tag* getTagFor(std::string syntaxType);
 };
 
