@@ -26,7 +26,7 @@ std::string WebValidator::fileExtensionTypeOf(std::string fileToValidate)
 
 std::vector<std::string> WebValidator::getValidationReportFor(std::string fileToValidate) 
 {
-	TagParser* polymorphicParser = parserSupplier.createParserFor(
+	TagParserInterface* polymorphicParser = parserSupplier.createParserFor(
 		fileExtensionTypeOf(fileToValidate));
 	std::vector<Tag*> parsedTags;
 	parsedTags = polymorphicParser->parseTagsFrom(fileToValidate);

@@ -1,53 +1,10 @@
 #include "stdafx.h"
 #include "XMLTag.h"
 
-
-void XMLTag::updateIsClosing(bool closing)
+XMLTag::XMLTag()
 {
-	this->closing = closing;
+
 }
 
-void XMLTag::updateRequiresClosing(bool reqClosing)
-{
-	this->reqClosing = reqClosing;
-}
-
-bool XMLTag::isClosing()
-{
-	return closing;
-}
-
-bool XMLTag::requiresClosing()
-{
-	return reqClosing;
-}
-
-void XMLTag::setAttributes(std::vector<Attribute> attributes)
-{
-	this->attributes = attributes;
-}
-
-void XMLTag::setTagName(std::string tagName)
-{
-	this->tagName = tagName;
-}
-
-void XMLTag::setLineNumber(int lineNumber)
-{
-	this->lineNumber = lineNumber;
-}
-
-std::vector<Attribute> XMLTag::getAttributes()
-{
-	return attributes;
-}
-
-std::string XMLTag::getTagName()
-{
-	return tagName;
-}
-
-int XMLTag::getLineNumber()
-{
-	return lineNumber;
-}
+XMLTag::~XMLTag()
+{}

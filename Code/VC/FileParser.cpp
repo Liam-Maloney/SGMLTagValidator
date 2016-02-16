@@ -30,7 +30,7 @@ std::string FileParser::readFile()
 	return fullContent;
 }
 
-std::vector<int> findOpenComments(std::string fullContent)
+std::vector<int> FileParser::findOpenComments(std::string fullContent)
 {
 	std::vector<int> startLocations;
 	for (int i = 0; i < fullContent.length() - 1; i++)
@@ -46,7 +46,7 @@ std::vector<int> findOpenComments(std::string fullContent)
 	return startLocations;
 }
 
-std::vector<int> findClosingComments(std::string fullContent)
+std::vector<int> FileParser::findClosingComments(std::string fullContent)
 {
 	std::vector<int> endLocations;
 	for (int i = 0; i < fullContent.length() - 1; i++)
@@ -62,7 +62,7 @@ std::vector<int> findClosingComments(std::string fullContent)
 	return endLocations;
 }
 
-std::string removeCommentedSectionsFromSource(
+std::string FileParser::removeCommentedSectionsFromSource(
 	std::vector<int> openCommentLocations, std::vector<int> closeCommentLocations, 
 	std::string fullContent)
 {

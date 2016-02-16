@@ -1,13 +1,12 @@
 #pragma once
 #include <string>
 #include "XMLTagParser.h"
-class TagParser;
-
+#include "HTMLTagParser.h"
 class ParserFactory
 {
-	TagParser* parserHandle;
+	TagParserInterface* parserHandle;
 public:
-	TagParser* createParserFor(std::string fileType);
+	TagParserInterface* createParserFor(std::string fileType);
 	~ParserFactory();
 };
 

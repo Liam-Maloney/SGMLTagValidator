@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ParserFactory.h"
 
-TagParser* ParserFactory::createParserFor(std::string fileType)
+TagParserInterface* ParserFactory::createParserFor(std::string fileType)
 {
 	std::transform(fileType.begin(), fileType.end(), fileType.begin(), toupper);
 	if (fileType == "XML")
@@ -10,7 +10,7 @@ TagParser* ParserFactory::createParserFor(std::string fileType)
 	}
 	else if (fileType == "HTML")
 	{
-		return NULL;
+		return new HTMLTagParser();
 	}
 	else
 	{

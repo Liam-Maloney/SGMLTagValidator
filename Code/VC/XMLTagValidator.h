@@ -11,6 +11,4 @@ class XMLTagValidator : public TagValidator
 	std::string valSingAttribute(Attribute currentAttr, int line, std::string tag);
 public:
 	std::vector<std::string> validateTags(std::vector<Tag*>);
-	XMLTagValidator();
-	~XMLTagValidator();
 };

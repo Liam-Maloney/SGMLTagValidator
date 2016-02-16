@@ -5,12 +5,3 @@ TagValidator* ValidatorFactory::createValidatorFor(std::string tagType)
 {
 	return new XMLTagValidator();
 }
-
-ValidatorFactory::ValidatorFactory()
-{
-}
-
-
-ValidatorFactory::~ValidatorFactory()
-{
-}

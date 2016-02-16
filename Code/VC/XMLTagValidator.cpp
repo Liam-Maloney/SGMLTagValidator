@@ -118,12 +118,3 @@ std::vector<std::string> XMLTagValidator::checkTagPairs(std::vector<Tag*> tagsTo
 
 	return results;
 }
-
-XMLTagValidator::XMLTagValidator()
-{
-}
-
-
-XMLTagValidator::~XMLTagValidator()
-{
-}

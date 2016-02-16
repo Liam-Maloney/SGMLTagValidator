@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include <string>
 #include "XMLTag.h"
+#include "HTMLTag.h"
 
 class Tag;
 

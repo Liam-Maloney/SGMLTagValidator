@@ -8,7 +8,5 @@ public:
 	bool hasEquals;
 	bool hasName;
 	bool hasValue;
-	Attribute();
-	~Attribute();
 };
 

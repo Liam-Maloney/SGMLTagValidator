@@ -7,9 +7,8 @@
 class IOFactory
 {
 	IO* ioHandle;
+	std::string fileExtensionTypeOf(std::string fileToValidate);
 public:
 	~IOFactory();
-
-	std::string fileExtensionTypeOf(std::string fileToValidate);
 	IO* getGenericIoHandle(std::string forThisTypeOfInput);
 };

@@ -7,6 +7,10 @@ Tag* TagFactory::getTagFor(std::string syntaxType)
 	{
 		return new XMLTag();
 	}
+	else if(syntaxType == "html")
+	{
+		return new HTMLTag();
+	}
 	else
 	{
 		return NULL;
