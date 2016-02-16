@@ -45,9 +45,8 @@ void clear()
 		std::cout << std::endl;
 }
 
-int main(int argc, char* argv[])
+void executeProgram()
 {
-	//::testing::InitGoogleTest(&argc, argv);
 	clear();
 	int option = 0;
 	while (true)
@@ -59,50 +58,54 @@ int main(int argc, char* argv[])
 		std::cout << "\t\t2. Exit" << std::endl;
 		std::cout << std::endl;
 		std::cout << std::endl;
-		std::cout << "Your Choice: "; 
+		std::cout << "Your Choice: ";
 		std::cin >> option;
 
 		switch (option)
 		{
-			case 1:
-			{
-				try
-				{
-					clear();
-					WebValidator validator;
-					std::string fileToValidate;
-					std::cout << "Please enter the name of the file to validate (eg: test.html, test.xml)\n" << std::endl;
-					std::cin >> fileToValidate;
-					clear();
-					std::vector<std::string> validationReport = validator.getValidationReportFor(fileToValidate);
-
-					for each (std::string reportItem in validationReport)
-					{
-						std::cout << reportItem << std::endl;
-					}
-					std::cout << "\n\n\n";
-					system("pause");
-					clear();
-				}
-				catch (std::exception &cause)
-				{
-					std::cout << "Error: " << cause.what();
-				}
-				break;
-			}
-
-			case 2: 
-				exit(0);
-				break;
-			default:
+		case 1:
+		{
+			try
 			{
 				clear();
-				std::cout << "ERROR:  Please enter a valid option (1 for validator, 2 for Exit.)" << std::endl;
+				WebValidator validator;
+				std::string fileToValidate;
+				std::cout << "Please enter the name of the file to validate (eg: test.html, test.xml)\n" << std::endl;
+				std::cin >> fileToValidate;
+				clear();
+				std::vector<std::string> validationReport = validator.getValidationReportFor(fileToValidate);
+
+				for each (std::string reportItem in validationReport)
+				{
+					std::cout << reportItem << std::endl;
+				}
+				std::cout << "\n\n\n";
 				system("pause");
-				break;
+				clear();
 			}
+			catch (std::exception &cause)
+			{
+				std::cout << "Error: " << cause.what();
+			}
+			break;
+		}
+
+		case 2:
+			exit(0);
+			break;
+		default:
+		{
+			clear();
+			std::cout << "ERROR:  Please enter a valid option (1 for validator, 2 for Exit.)" << std::endl;
+			system("pause");
+			break;
+		}
 		}
 	}
-	//return RUN_ALL_TESTS();
-	return 0;
+}
+int main(int argc, char* argv[])
+{
+	::testing::InitGoogleTest(&argc, argv);
+	//executeProgram();
+	return RUN_ALL_TESTS();
 }
