@@ -27,7 +27,7 @@ std::string SGMLParser::findOutTagName(std::string token)
 		}
 		else
 		{
-			return token.substr(2, firstSpaceIndex - 3);
+			return token.substr(2, firstSpaceIndex - 2);
 		}
 	}
 	else

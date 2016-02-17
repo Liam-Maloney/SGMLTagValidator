@@ -32,22 +32,25 @@ std::vector<Lexer::tokenLineNumPairs> Lexer::tokenizeAccordingTo(std::vector<int
 	while (!sortedDelimitersOfTokens.empty())
 	{
 		progressToOpenTagSymbol(&sortedDelimitersOfTokens, inSource);
-		atStartIndex = sortedDelimitersOfTokens.front();
-		sortedDelimitersOfTokens.erase(sortedDelimitersOfTokens.begin());
-		lineNum += updateLineNumber(&lineNumberIndexes, &sortedDelimitersOfTokens);
-		progressToCloseTagSymbol(&sortedDelimitersOfTokens, inSource);
-		upToThisPoint = sortedDelimitersOfTokens.front();
-		sortedDelimitersOfTokens.erase(sortedDelimitersOfTokens.begin());
-		tokenLineNumPairs newTokenLineNumPair = formTokenLineNumPair(atStartIndex,
-			upToThisPoint, lineNum, inSource);
-		tokenBuildup.emplace_back(newTokenLineNumPair);
+		if (!sortedDelimitersOfTokens.empty())
+		{
+			atStartIndex = sortedDelimitersOfTokens.front();
+			sortedDelimitersOfTokens.erase(sortedDelimitersOfTokens.begin());
+			lineNum += updateLineNumber(&lineNumberIndexes, &sortedDelimitersOfTokens);
+			progressToCloseTagSymbol(&sortedDelimitersOfTokens, inSource);
+			upToThisPoint = sortedDelimitersOfTokens.front();
+			sortedDelimitersOfTokens.erase(sortedDelimitersOfTokens.begin());
+			tokenLineNumPairs newTokenLineNumPair = formTokenLineNumPair(atStartIndex,
+				upToThisPoint, lineNum, inSource);
+			tokenBuildup.emplace_back(newTokenLineNumPair);
+		}
 	}
 	return tokenBuildup;
 }
 
 void Lexer::progressToOpenTagSymbol(std::vector<int>* sortedDelimitersOfTokens, std::string inSource)
 {
-	while (inSource[sortedDelimitersOfTokens->front()] != '<' && !sortedDelimitersOfTokens->empty())
+	while (!sortedDelimitersOfTokens->empty() && inSource[sortedDelimitersOfTokens->front()] != '<')
 	{
 		//pop_front hack!
 		sortedDelimitersOfTokens->erase(sortedDelimitersOfTokens->begin());

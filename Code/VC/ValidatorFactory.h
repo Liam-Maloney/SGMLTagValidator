@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "TagValidator.h"
-#include "XMLTagValidator.h"
+#include "SGMLTagValidator.h"
 
 class ValidatorFactory
 {

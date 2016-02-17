@@ -36,6 +36,14 @@ std::vector<std::string> WebValidator::getValidationReportFor(std::string fileTo
 		fileExtensionTypeOf(fileToValidate));
 	std::vector<std::string> errors = 
 		polymorphicValidator->validateTags(parsedTags);
+	delete polymorphicParser;
+	delete polymorphicValidator;
+
+	for each (Tag* current in parsedTags)
+	{
+		delete current;
+	}
+
 	return errors;
 }
 
@@ -106,6 +114,6 @@ void executeProgram()
 int main(int argc, char* argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);
-	//executeProgram();
+	executeProgram();
 	return RUN_ALL_TESTS();
 }

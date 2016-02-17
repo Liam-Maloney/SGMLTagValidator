@@ -23,6 +23,11 @@ std::vector<int> Utility::findLocationsOf(char whatImLookingFor, std::string ins
 					searcherLocation = insideThis.find_first_of(whatImLookingFor, searcherLocation + 1);
 				}
 			}
+			else
+			{
+				locations.push_back(searcherLocation);
+				searcherLocation = insideThis.find_first_of(whatImLookingFor, searcherLocation + 1);
+			}
 		}
 		else
 		{
