@@ -16,3 +16,5 @@ Tag* TagFactory::getTagFor(std::string syntaxType)
 		return NULL;
 	}
 }
+
+

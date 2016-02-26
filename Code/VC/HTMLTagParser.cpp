@@ -55,13 +55,14 @@ bool HTMLTagParser::findOutIfNeedsClosingTag(std::string token)
 std::vector<Tag*> HTMLTagParser::parseTagsFrom(std::string fileToParseFrom)
 {
 	IO* source = ioHandle.getGenericIoHandle(fileToParseFrom);
-	return getTagsAsVectorParsedFrom(source->getContent());
+	return getTagsAsVectorParsedFrom(source);
 }
 
-std::vector<Tag*> HTMLTagParser::getTagsAsVectorParsedFrom(std::string source)
+std::vector<Tag*> HTMLTagParser::getTagsAsVectorParsedFrom(IO* source)
 {
+	std::string sourceStr = source->getContent();
 	Lexer tokenizer;
-	std::vector<Lexer::tokenLineNumPairs> tokenizedTags = tokenizer.readTokenizedTagsFrom(source);
+	std::vector<Lexer::tokenLineNumPairs> tokenizedTags = tokenizer.readTokenizedTagsFrom(sourceStr);
 	std::vector<Tag*> parsedTags = formTagsAsObjects(tokenizedTags);
 	return parsedTags;
 }

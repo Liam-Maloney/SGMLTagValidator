@@ -27,6 +27,7 @@ std::string FileParser::readFile()
 		fullContent += nextChar;
 		fileHandle.get(nextChar);
 	}
+	fileHandle.close();
 	return fullContent;
 }
 
@@ -114,9 +115,4 @@ std::string FileParser::getContent()
 	std::vector<int> closeCommentLocations = findClosingComments(fullContent);
 	fullContent = removeCommentedSectionsFromSource(openCommentLocations, closeCommentLocations, fullContent);
 	return fullContent;
-}
-
-FileParser::~FileParser()
-{
-	fileHandle.close();
 }

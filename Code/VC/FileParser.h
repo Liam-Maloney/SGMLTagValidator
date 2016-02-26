@@ -15,5 +15,4 @@ class FileParser : public IO
 public:
 	std::string getContent();
 	FileParser(std::string fileToParseFrom);
-	~FileParser();
 };

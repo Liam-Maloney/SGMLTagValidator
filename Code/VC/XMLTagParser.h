@@ -18,6 +18,6 @@ public:
 
 	XMLTagParser();
 	~XMLTagParser();
-	std::vector<Tag*> getTagsAsVectorParsedFrom(std::string source);
 	std::vector<Tag*> parseTagsFrom(std::string fileToParseFrom);
+	std::vector<Tag*> getTagsAsVectorParsedFrom(IO* source);
 };

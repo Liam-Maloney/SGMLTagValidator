@@ -90,30 +90,50 @@ std::vector<std::string> SGMLTagValidator::validateTags(std::vector<Tag*> tagsTo
 
 std::vector<std::string> SGMLTagValidator::checkTagPairs(std::vector<Tag*> tagsToCheck)
 {
-	std::stack<Tag*> bracketPairs;
+	std::stack<std::string> bracketPairs;
+	std::string tagName;
+	std::string openTagOnStack;
+	bool isClosingTag;
+
 	std::vector<std::string> results;
 	for each (Tag* current in tagsToCheck)
 	{
-		if (current->isClosing())
+		tagName = current->getTagName();
+		isClosingTag = current->isClosing();
+
+		if (isClosingTag && !bracketPairs.empty())
 		{
-			if (bracketPairs.top()->getTagName() != current->getTagName())
+			openTagOnStack = bracketPairs.top();
+			if (openTagOnStack == tagName)
 			{
-				results.emplace_back("Error line " + std::to_string(bracketPairs.top()->getLineNumber()) + ", no closing tag for <" + bracketPairs.top()->getTagName() + ">\n");
-				//results.emplace_back("Error line " + std::to_string(current->getLineNumber()) + ", no opening tag for <" + current->getTagName() + ">, expected closing tag for <" + bracketPairs.top()->getTagName() + ">\n");
-			}
-			bracketPairs.pop();
-		}
-		else
-		{
-			if (current->requiresClosing() == false)
-			{
-				//do nothing because it does not need to be validated as it does not require a closing
+				bracketPairs.pop();
 			}
 			else
 			{
-				bracketPairs.push(current);
+				results.emplace_back("No closing tag for " + openTagOnStack + ", encountered closing tag for "
+					+ tagName + " on line " + std::to_string(current->getLineNumber()));
+				bracketPairs.pop();
+				if (!bracketPairs.empty())
+				{
+					bracketPairs.pop();
+				}
 			}
 		}
+		else
+		{
+			if (current->requiresClosing())
+			{
+				bracketPairs.push(tagName);
+			}
+		}
+	}
+
+	while(!bracketPairs.empty())
+	{
+		tagName = bracketPairs.top();
+		results.emplace_back("No closing tag for " + tagName + ", encountered closing tag for "
+			+ tagName + " at EOF");
+		bracketPairs.pop();
 	}
 
 	return results;

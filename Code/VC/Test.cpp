@@ -18,7 +18,8 @@ public:
 class XMLTagParserTest{
 public:
 	ParserFactory parserSupplier;
-	TagParserInterface* classUnderTest = parserSupplier.createParserFor("xml"); //class under test
+	TagParserInterface* classUnderTest = parserSupplier.
+		createParserFor("xml");
 	IO* simulatedInputHandle;
 };
 
@@ -28,7 +29,9 @@ struct XMLTagNameTestParams
 	std::string expectedName;
 };
 
-class TagNameTests : public XMLTagParserTest, public testing::Test, public testing::WithParamInterface<XMLTagNameTestParams>{
+class TagNameTests : public XMLTagParserTest, 
+	public testing::Test, 
+	public testing::WithParamInterface<XMLTagNameTestParams>{
 public:
 	XMLTagNameTestParams parameters = GetParam();
 };
@@ -38,7 +41,8 @@ TEST_P(TagNameTests, TestContentsOfNameParse)
 
 	SimulatedIO input(parameters.simulatedInput);
 	simulatedInputHandle = &input;
-	std::vector<Tag*> resultsOfTest = classUnderTest->getTagsAsVectorParsedFrom(simulatedInputHandle->getContent());
+	std::vector<Tag*> resultsOfTest = classUnderTest->
+		getTagsAsVectorParsedFrom(simulatedInputHandle);
 	std::string parsedResult = resultsOfTest.front()->getTagName();
 	ASSERT_EQ(parameters.expectedName, parsedResult);
 }
@@ -55,7 +59,7 @@ INSTANTIATE_TEST_CASE_P(default, TagNameTests,
 	XMLTagNameTestParams{ "<t >", "t" },
 	XMLTagNameTestParams{ "<test with=\"attributes\">", "test" },
 	XMLTagNameTestParams{ "<test    >", "test" },
-	XMLTagNameTestParams{ "< test>", "" }, //name is everything before first space in tag, in this case test is an attribute name
+	XMLTagNameTestParams{ "< test>", "" },
 	XMLTagNameTestParams{ "<test >", "test" },
 	XMLTagNameTestParams{"<test>", "test"}
 ));
@@ -68,7 +72,9 @@ struct XMLAttributePareseParams
 	std::string expectedAttributeName;
 };
 
-class AttributeNameTests : public XMLTagParserTest, public testing::Test, public testing::WithParamInterface<XMLAttributePareseParams>{
+class AttributeNameTests : public XMLTagParserTest, 
+	public testing::Test, 
+	public testing::WithParamInterface<XMLAttributePareseParams>{
 public:
 	XMLAttributePareseParams parameters = GetParam();
 };
@@ -78,8 +84,10 @@ TEST_P(AttributeNameTests, TestNameOfAttributeParse)
 
 	SimulatedIO input(parameters.simulatedInput);
 	simulatedInputHandle = &input;
-	std::vector<Tag*> resultsOfTest = classUnderTest->getTagsAsVectorParsedFrom(simulatedInputHandle->getContent());
-	std::string parsedResult = resultsOfTest.front()->getAttributes().front().name;
+	std::vector<Tag*> resultsOfTest = classUnderTest->
+		getTagsAsVectorParsedFrom(simulatedInputHandle);
+	std::string parsedResult = resultsOfTest.front()->
+		getAttributes().front().name;
 	ASSERT_EQ(parameters.expectedAttributeName, parsedResult);
 }
 
@@ -101,7 +109,9 @@ struct XMLAttributeValuePareseParams
 	std::string expectedAttributeValue;
 };
 
-class AttributeValueTests : public XMLTagParserTest, public testing::Test, public testing::WithParamInterface<XMLAttributeValuePareseParams>{
+class AttributeValueTests : public XMLTagParserTest, 
+	public testing::Test, 
+	public testing::WithParamInterface<XMLAttributeValuePareseParams>{
 public:
 	XMLAttributeValuePareseParams parameters = GetParam();
 };
@@ -111,8 +121,10 @@ TEST_P(AttributeValueTests, TestNameOfAttributeParse)
 
 	SimulatedIO input(parameters.simulatedInput);
 	simulatedInputHandle = &input;
-	std::vector<Tag*> resultsOfTest = classUnderTest->getTagsAsVectorParsedFrom(simulatedInputHandle->getContent());
-	std::string parsedResult = resultsOfTest.front()->getAttributes().front().value;
+	std::vector<Tag*> resultsOfTest = classUnderTest->
+		getTagsAsVectorParsedFrom(simulatedInputHandle);
+	std::string parsedResult = resultsOfTest.front()->
+		getAttributes().front().value;
 	if (parsedResult != "")
 	{
 		parsedResult = parsedResult.substr(1, parsedResult.length() - 2);
@@ -122,8 +134,10 @@ TEST_P(AttributeValueTests, TestNameOfAttributeParse)
 
 INSTANTIATE_TEST_CASE_P(default, AttributeValueTests,
 	testing::Values(
-	XMLAttributeValuePareseParams{ "<t t=\" <this is not a tag!>  \" >", " <this is not a tag!>  " },
-	XMLAttributeValuePareseParams{ "<t t=\" preservedSpaces  \" >", " preservedSpaces  " },
+	XMLAttributeValuePareseParams{ 
+	"<t t=\" <this is not a tag!>  \" >", " <this is not a tag!>  " },
+	XMLAttributeValuePareseParams{ 
+		"<t t=\" preservedSpaces  \" >", " preservedSpaces  " },
 	XMLAttributeValuePareseParams{ "<t t >", "" },
 	XMLAttributeValuePareseParams{ "< this=\"is\">", "is" }
 ));

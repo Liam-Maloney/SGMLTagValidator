@@ -23,3 +23,4 @@ ParserFactory::~ParserFactory()
 {
 	delete parserHandle;
 }
+

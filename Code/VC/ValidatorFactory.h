@@ -8,3 +8,4 @@ class ValidatorFactory
 public:
 	TagValidator* createValidatorFor(std::string tagType);
 };
+

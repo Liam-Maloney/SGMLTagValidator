@@ -8,3 +8,5 @@ class IO
 public:
 	virtual std::string getContent() = 0;
 };
+
+

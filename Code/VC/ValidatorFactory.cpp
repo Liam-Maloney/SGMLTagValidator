@@ -6,3 +6,5 @@ TagValidator* ValidatorFactory::createValidatorFor(std::string tagType)
 	return new SGMLTagValidator();
 }
 
+
+

@@ -10,3 +10,5 @@ class IOFactory
 public:
 	IO* getGenericIoHandle(std::string forThisTypeOfInput);
 };
+
+

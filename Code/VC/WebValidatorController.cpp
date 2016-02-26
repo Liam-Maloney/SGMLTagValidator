@@ -113,7 +113,6 @@ void executeProgram()
 }
 int main(int argc, char* argv[])
 {
-	::testing::InitGoogleTest(&argc, argv);
 	executeProgram();
 	return RUN_ALL_TESTS();
 }

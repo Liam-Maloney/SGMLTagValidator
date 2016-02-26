@@ -2,7 +2,6 @@
 #include "SGMLParser.h"
 #include "TagParserInterface.h"
 #include <map>
-#
 
 class HTMLTagParser : public TagParserInterface, public SGMLParser
 {
@@ -12,11 +11,10 @@ class HTMLTagParser : public TagParserInterface, public SGMLParser
 	bool findOutIfNeedsClosingTag(std::string token);
 
 public:
+	std::vector<Tag*> getTagsAsVectorParsedFrom(IO* source);
 
 	HTMLTagParser();
 	~HTMLTagParser();
-
-	std::vector<Tag*> getTagsAsVectorParsedFrom(std::string source); //
 	std::vector<Tag*> parseTagsFrom(std::string fileToParseFrom); //
 };
 
